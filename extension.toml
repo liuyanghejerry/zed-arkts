@@ -1,0 +1,42 @@
+name = "ets-zed"
+id = "ets"
+schema_version = 1
+version = "0.1.0"
+description = "Language support for ETS (Harmony ETS) files in Zed"
+authors = ["liuyanghejerry <liuyanghejerry@126.com>"]
+repository = "https://github.com/liuyanghejerry/ets-zed"
+license = "MIT"
+
+# [extension]
+# themes = []
+
+# [[extension.languages]]
+# name = "ETS"
+# language_id = "ets"
+# file_extensions = ["ets"]
+# root_patterns = []
+# comment_tokens = ["//", ["/*", "*/"]]
+# bracket_pairs = [
+#   { open = "(", close = ")" },
+#   { open = "[", close = "]" },
+#   { open = "{", close = "}" },
+#   { open = "<", close = ">" }
+# ]
+# indentation = { unit = 2, type = "Spaces" }
+# auto_indent = true
+# folding = true
+
+# [[extension.language_servers]]
+# name = "ets-language-server"
+# language = "ets"
+# command = "typescript-language-server"
+# args = ["--stdio"]
+
+# [[extension.grammars]]
+# name = "ets"
+# path = "grammars/ets.tmLanguage.json"
+# scope = "source.ets"
+# file_types = ["ets"]
+[grammars.ets]
+repository = "file://Users/liuyanghe02/develop/ets-zed/ets"
+rev = "master"

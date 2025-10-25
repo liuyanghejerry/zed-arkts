@@ -1,0 +1,60 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ETS",
+  "scopeName": "source.ets",
+  "fileTypes": ["ets"],
+  "patterns": [
+    {
+      "include": "source.ts#expression"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.ets",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block.ets",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "patterns": [
+            {
+              "name": "comment.block.ets",
+              "begin": "/\\*",
+              "end": "\\*/"
+            }
+          ]
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.ets",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ets",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.ets",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ets",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

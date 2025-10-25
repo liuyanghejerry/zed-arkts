@@ -1,0 +1,43 @@
+{
+  "name": "ets-demo-project",
+  "version": "1.0.0",
+  "description": "鸿蒙ETS示例项目，包含第三方库依赖",
+  "main": "",
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    // HTTP请求库
+    "@ohos/axios": "^2.2.0",
+
+    // JavaScript工具库
+    "@ohos/lodash": "^4.17.21",
+
+    // 日期处理库
+    "@ohos/moment": "^2.29.4",
+
+    // 其他可能用到的第三方库
+    "@ohos/crypto-js": "^4.1.1",        // 加密库
+    "@ohjs/logger": "^1.0.2",            // 日志库
+    "@ohos/jsstore": "^4.4.3",           // 本地数据库
+    "@ohos/chart": "^1.0.0",             // 图表库
+    "@ohos/utils": "^1.0.1"              // 工具库
+  },
+  "devDependencies": {
+    "@ohos/hypium": "1.0.6",             // 测试框架
+    "@ohos/hamock": "1.0.0"              // Mock库
+  },
+  "repository": {},
+  "keywords": [
+    "HarmonyOS",
+    "ETS",
+    "ArkTS",
+    "TypeScript",
+    "鸿蒙开发"
+  ],
+  "ohos": {
+    "org": "example.com",
+    "buildOption": {
+      "compileMode": "esmodule"
+    }
+  }
+}
