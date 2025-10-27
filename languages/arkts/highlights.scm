@@ -37,7 +37,6 @@
   "public"
   "protected"
   "typeof"
-  "void"
   "delete"
   "in"
   "instanceof"
@@ -59,8 +58,8 @@
   "string"
   "boolean"
   "void"
-  "null"
   "undefined"
+  "null"
 ] @type.builtin
 
 ; Operators
@@ -267,8 +266,6 @@
 (member_expression
   property: (identifier) @property)
 
-
-
 ; Arrow function
 (arrow_function
   "=>" @operator)
@@ -283,14 +280,11 @@
 ; Literals
 (string_literal) @string
 (template_literal) @string
-; (template_substitution
-;   "${" @punctuation.special
-;   "}" @punctuation.special)
-; (escape_sequence) @string.escape
-
 (numeric_literal) @number
 (boolean_literal) @boolean
 (null_literal) @constant.builtin
+
+
 
 ; Resource expression - ArkTS特有的$r()语法
 (resource_expression
@@ -395,16 +389,9 @@
   "{" @punctuation.special
   "}" @punctuation.special)
 
-; Escape sequences in strings
-; (escape_sequence) @string.escape
-
 ; Spread element
 (spread_element
   "..." @operator)
-
-; Update expressions (++/--)
-; (update_expression
-;   operator: choice("++" "--") @operator)
 
 ; Non-null assertion
 (non_null_assertion_expression
