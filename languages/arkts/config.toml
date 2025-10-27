@@ -1,0 +1,5 @@
+name = "ArkTS Language"
+grammar = "arkts"
+path_suffixes = ["ets"]
+line_comments = ["// "]
+tab_size = 2

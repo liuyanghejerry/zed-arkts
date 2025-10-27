@@ -1,42 +1,12 @@
-name = "ets-zed"
-id = "ets"
+name = "zed-arkts"
+id = "zed-arkts"
 schema_version = 1
 version = "0.1.0"
-description = "Language support for ETS (Harmony ETS) files in Zed"
+description = "Language support for ArkTS (Harmony ETS) files in Zed"
 authors = ["liuyanghejerry <liuyanghejerry@126.com>"]
-repository = "https://github.com/liuyanghejerry/ets-zed"
+repository = "https://github.com/liuyanghejerry/zed-arkts"
 license = "MIT"
 
-# [extension]
-# themes = []
-
-# [[extension.languages]]
-# name = "ETS"
-# language_id = "ets"
-# file_extensions = ["ets"]
-# root_patterns = []
-# comment_tokens = ["//", ["/*", "*/"]]
-# bracket_pairs = [
-#   { open = "(", close = ")" },
-#   { open = "[", close = "]" },
-#   { open = "{", close = "}" },
-#   { open = "<", close = ">" }
-# ]
-# indentation = { unit = 2, type = "Spaces" }
-# auto_indent = true
-# folding = true
-
-# [[extension.language_servers]]
-# name = "ets-language-server"
-# language = "ets"
-# command = "typescript-language-server"
-# args = ["--stdio"]
-
-# [[extension.grammars]]
-# name = "ets"
-# path = "grammars/ets.tmLanguage.json"
-# scope = "source.ets"
-# file_types = ["ets"]
-[grammars.ets]
-repository = "file://Users/liuyanghe02/develop/ets-zed/ets"
-rev = "master"
+[grammars.arkts]
+repository = "https://github.com/liuyanghejerry/tree-sitter-arkts.git"
+rev = "9ef81d6561996d617f2a7b804a87f0195d9c84aa"

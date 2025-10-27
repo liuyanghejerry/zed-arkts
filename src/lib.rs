@@ -1,10 +1,10 @@
 use zed_extension_api as zed;
 
-struct MyEtsExtension {
+struct MyArkTSExtension {
     // ... state
 }
 
-impl zed::Extension for MyEtsExtension {
+impl zed::Extension for MyArkTSExtension {
     fn new() -> Self {
         Self {
             // Initialize any state here
@@ -12,4 +12,4 @@ impl zed::Extension for MyEtsExtension {
     }
 }
 
-zed::register_extension!(MyEtsExtension);
+zed::register_extension!(MyArkTSExtension);

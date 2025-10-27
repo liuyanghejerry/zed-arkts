@@ -1,9 +1,9 @@
 [package]
-name = "ets-zed"
+name = "arkts-zed"
 version = "0.1.0"
 edition = "2021"
-description = "A Zed extension for ETS development"
-authors = ["Your Name <your.email@example.com>"]
+description = "A Zed extension for ArkTS development"
+authors = ["liuyanghejerry <liuyanghejerry@126.com>"]
 license = "MIT"
 
 [lib]
