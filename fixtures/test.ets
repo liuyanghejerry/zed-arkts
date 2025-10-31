@@ -10,6 +10,14 @@ import { axios } from '@ohos/axios';
 import { lodash } from '@ohos/lodash';
 import { moment } from '@ohos/moment';
 
+// 用户信息接口
+interface UserInfo {
+  id: number;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
 @Entry
 @Component
 struct TestPage {
@@ -17,14 +25,6 @@ struct TestPage {
   @State userInfo: UserInfo | null = null;
   @State currentTime: string = '';
   @State isLoading: boolean = false;
-
-  // 用户信息接口
-  interface UserInfo {
-    id: number;
-    name: string;
-    email: string;
-    avatar: string;
-  }
 
   aboutToAppear() {
     // 页面加载时初始化

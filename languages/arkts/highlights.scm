@@ -240,7 +240,7 @@
 
 ; Method declaration
 (method_declaration
-  name: (identifier) @function.method)
+  name: (identifier) @function)
 
 ; Constructor declaration
 (constructor_declaration
@@ -272,10 +272,21 @@
 
 ; Function expression
 (function_expression
-  "function" @keyword)
+  "function" @keyword
+  name: (identifier) @variable)
 
 ; Identifiers
 (identifier) @variable
+
+; Special Identifiers
+((identifier) @variable.builtin
+  (#eq? @variable.builtin "this"))
+((identifier) @variable.builtin
+  (#eq? @variable.builtin "super"))
+
+((identifier) @variable.builtin
+ (#match? @variable.builtin "^(arguments|module|console|window|document)$")
+ (#is-not? local))
 
 ; Literals
 (string_literal) @string
@@ -409,7 +420,9 @@
 ; Type arguments
 (type_arguments
   "<" @punctuation.bracket
-  ">" @punctuation.bracket)
+  (type_annotation (primary_type (identifier) @type))
+  ">" @punctuation.bracket
+)
 
 ; Optional chaining
 (member_expression
