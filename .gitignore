@@ -17,3 +17,5 @@ Thumbs.db
 *~
 /dist/
 node_modules
+extension.wasm
+grammars/

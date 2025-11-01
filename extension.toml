@@ -1,5 +1,5 @@
-name = "arkts"
-id = "arkts"
+name = "zed-arkts"
+id = "zed-arkts"
 schema_version = 1
 version = "0.1.0"
 description = "Language support for ArkTS (Harmony ETS) files in Zed"
