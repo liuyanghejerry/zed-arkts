@@ -16,3 +16,4 @@ Thumbs.db
 *.bak
 *~
 /dist/
+node_modules

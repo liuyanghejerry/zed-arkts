@@ -1,5 +1,5 @@
-name = "zed-arkts"
-id = "zed-arkts"
+name = "arkts"
+id = "arkts"
 schema_version = 1
 version = "0.1.0"
 description = "Language support for ArkTS (Harmony ETS) files in Zed"
@@ -8,5 +8,10 @@ repository = "https://github.com/liuyanghejerry/zed-arkts"
 license = "MIT"
 
 [grammars.arkts]
-repository = "https://github.com/liuyanghejerry/tree-sitter-arkts.git"
-rev = "9ef81d6561996d617f2a7b804a87f0195d9c84aa"
+# repository = "https://github.com/liuyanghejerry/tree-sitter-arkts.git"
+repository = "file:///Users/liuyanghejerry/develop/tree-sitter-arkts"
+rev = "2b3d4b944ea4417729ebcd030834a5352cff7bb2"
+
+[language_servers.arkts-language-server]
+name = "ArkTS LSP"
+languages = ["ArkTS Language"]
