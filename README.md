@@ -1,4 +1,4 @@
-# ArkTS Zed Extension
+# ArkTS Extension
 
 A Zed extension for ArkTS (aka.ETS) development support.
 
@@ -6,17 +6,18 @@ This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Milli
 
 ## Features
 
-- **Language Detection**: Automatically recognizes `.ets` files as ETS language
 - **Syntax Highlighting**: Provides TypeScript-based syntax highlighting for ETS files
-- **Proper Zed Extension Structure**: Follows Zed extension conventions
 
 ## Current Status
 
-This is a **complete Zed language extension** that provides:
+This is a **Zed language extension** that provides:
 
 - File type detection (`.ets` → ETS language)
 - Syntax highlighting extending TypeScript grammar
 - Proper Zed extension manifest and structure
+
+## Plans
+- Language server integration.
 
 ## Installation
 
@@ -33,9 +34,9 @@ This is a **complete Zed language extension** that provides:
 4. Copy the contents of `dist/` to your Zed extensions directory:
 
    ```
-   cp -r dist/* ~/.config/zed/extensions/ets-zed/
+   cp -r dist/* ~/.config/zed/extensions/arkts/
    # or on macOS:
-   cp -r dist/* ~/Library/Application\ Support/Zed/extensions/ets-zed/
+   cp -r dist/* ~/Library/Application\ Support/Zed/extensions/arkts/
    ```
 
    - **Linux**: `~/.config/zed/extensions/`
