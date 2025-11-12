@@ -104,7 +104,7 @@ impl zed::Extension for MyArkTSExtension {
             abs_path.to_string_lossy().to_string()
         };
 
-        println!("ets_lang_server_abs_path: {}", ets_lang_server_abs_path);
+        // println!("ets_lang_server_abs_path: {}", ets_lang_server_abs_path);
 
         // 创建环境变量映射
         let env = vec![("ETS_LANG_SERVER".to_string(), ets_lang_server_abs_path)];
