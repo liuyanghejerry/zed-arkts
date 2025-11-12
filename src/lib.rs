@@ -11,7 +11,8 @@ const LANGUAGE_SERVER_VERSION: &str = "latest";
 const LANGUAGE_SERVER_NAME: &str = "@arkts/language-server";
 const ETS_SERVER_PATH: &str = "node_modules/@arkts/language-server/bin/ets-language-server.js";
 // const ETS_SERVER_PATH: &str = "/Users/liuyanghejerry/develop/arkTS/packages/language-server/bin/ets-language-server.js";
-const SERVER_WRAPPER_PATH: &str = "/Users/liuyanghejerry/develop/zed-arkts/language-server-wrapper/index.js";
+const SERVER_WRAPPER_PATH: &str = "language-server-wrapper/index.js";
+// const SERVER_WRAPPER_PATH: &str = "/Users/liuyanghejerry/develop/zed-arkts/language-server-wrapper/index.js";
 
 struct MyArkTSExtension {
     language_server_path: Option<String>,
@@ -41,8 +42,18 @@ impl zed::Extension for MyArkTSExtension {
             };
         }
 
+        // 将 SERVER_WRAPPER_PATH 解析为绝对路径
+        let language_server_abs_path = if Path::new(SERVER_WRAPPER_PATH).is_absolute() {
+            SERVER_WRAPPER_PATH.to_string()
+        } else {
+            // 相对路径需要基于扩展进程的当前工作目录解析为绝对路径
+            let current_dir = env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+            let abs_path = current_dir.join(SERVER_WRAPPER_PATH);
+            abs_path.to_string_lossy().to_string()
+        };
+
         Self {
-            language_server_path: Some(SERVER_WRAPPER_PATH.to_string()),
+            language_server_path: Some(language_server_abs_path),
         }
     }
 
@@ -75,7 +86,7 @@ impl zed::Extension for MyArkTSExtension {
     fn language_server_command(
         &mut self,
         language_server_id: &LanguageServerId,
-        worktree: &zed::Worktree,
+        _worktree: &zed::Worktree,
     ) -> Result<zed::Command, String> {
         zed::set_language_server_installation_status(
             language_server_id,
