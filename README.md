@@ -7,6 +7,10 @@ This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Milli
 ## Features
 
 - **Syntax Highlighting**: Provides TypeScript-based syntax highlighting for ETS files
+- **Language Server**: Provides basic language server support, such as go to definition, and find references.
+
+![Module definition](assets/screenshot-1.jpg)
+![Symbol definition](assets/screenshot-1.jpg)
 
 ## Current Status
 
@@ -14,34 +18,23 @@ This is a **Zed language extension** that provides:
 
 - File type detection (`.ets` → ETS language)
 - Syntax highlighting extending TypeScript grammar
-- Proper Zed extension manifest and structure
+- Go to definition
+- Find references
+- Module definition
 
 ## Plans
-- Language server integration.
+- Autocomplete.
+- Code actions.
+- Compatible with more Node.js versions.
 
 ## Installation
 
 ### From Source
 
-1. Install Rust: https://rustup.rs/
-2. Clone this repository
-3. Build the extension:
-   ```bash
-   ./build.sh
-   # or manually:
-   # cargo build --release
-   ```
-4. Copy the contents of `dist/` to your Zed extensions directory:
+You need a Node.js environment to build this extension. Prefer Node.js 24.
 
-   ```
-   cp -r dist/* ~/.config/zed/extensions/arkts/
-   # or on macOS:
-   cp -r dist/* ~/Library/Application\ Support/Zed/extensions/arkts/
-   ```
-
-   - **Linux**: `~/.config/zed/extensions/`
-   - **macOS**: `~/Library/Application Support/Zed/extensions/`
-   - **Windows**: `%APPDATA%\Zed\extensions\`
+1. Clone this repository
+2. Open extension page in Zed and install extension from directory
 
 ## Development
 
