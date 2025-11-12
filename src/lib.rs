@@ -8,19 +8,16 @@ use zed::settings::LspSettings;
 use zed_extension_api as zed;
 
 const LANGUAGE_SERVER_VERSION: &str = "latest";
-const LANGUAGE_SERVER_NAME: &str = "@arkts/language-server";
+const LANGUAGE_SERVER_NAME: &str = "zed-ets-language-server";
 const ETS_SERVER_PATH: &str = "node_modules/@arkts/language-server/bin/ets-language-server.js";
-// const ETS_SERVER_PATH: &str = "/Users/liuyanghejerry/develop/arkTS/packages/language-server/bin/ets-language-server.js";
-const SERVER_WRAPPER_PATH: &str = "language-server-wrapper/index.js";
-// const SERVER_WRAPPER_PATH: &str = "/Users/liuyanghejerry/develop/zed-arkts/language-server-wrapper/index.js";
+const SERVER_WRAPPER_PATH: &str = "node_modules/zed-ets-language-server/index.js";
 
 struct MyArkTSExtension {
     language_server_path: Option<String>,
 }
 
 fn ets_server_exists() -> bool {
-    fs::metadata(ETS_SERVER_PATH).map_or(false, |stat| stat.is_file())
-    // true
+    fs::metadata(SERVER_WRAPPER_PATH).map_or(false, |stat| stat.is_file())
 }
 
 impl zed::Extension for MyArkTSExtension {
