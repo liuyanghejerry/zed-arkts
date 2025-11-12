@@ -17,7 +17,7 @@ function createSimpleLogger() {
     return {
       info: noop,
       success: noop,
-      error: noop,
+      error: console.error,
       warn: noop,
       section: noop,
       data: noop,
@@ -143,6 +143,23 @@ async function main() {
         const message = JSON.parse(messageJson);
         // Send message to language server via IPC
         serverProcess.send(message);
+
+        // This special ets request is required in document: https://github.com/ohosvscode/arkTS/tree/next/packages/language-server
+        // When this goes wrong, ETS UI decorators and functions will be type of any
+        if (message.method === 'initialize') {
+          const { initializationOptions } = message.params;
+          const etsSpecialRequest = {
+            jsonrpc: '2.0',
+            id: Date.now(),
+            method: 'ets/waitForEtsConfigurationChangedRequested',
+            params: {
+              typescript: initializationOptions.typescript,
+              ohos: initializationOptions.ohos,
+              debug: initializationOptions.debug,
+            },
+          };
+          serverProcess.send(etsSpecialRequest);
+        }
       } catch (error) {
         logger.error(`Failed to parse message from stdin: ${error.message}, ${messageJson}`);
       }
