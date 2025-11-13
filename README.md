@@ -2,7 +2,7 @@
 
 A Zed extension for ArkTS (aka.ETS) development support.
 
-This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Million-mo/tree-sitter-arkts). Thanks for offering an excellent foundation for ArkTS highlighting.
+This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Million-mo/tree-sitter-arkts) and [ohosvscode/arkTS](https://github.com/ohosvscode/arkTS). Thanks for offering an excellent foundation for ArkTS.
 
 ## Features
 
@@ -23,18 +23,28 @@ This is a **Zed language extension** that provides:
 - Module definition
 
 ## Plans
-- Autocomplete.
-- Code actions.
 - Compatible with more Node.js versions.
+- Autocomplete.
+- JSON5 schemas support for `oh-package.json5`.
+- Code actions, like formatting.
+
+## Non-goals
+- Debuggers.
+- Code snippets.
+- OpenHarmony SDK management.
 
 ## Installation
 
 ### From Source
 
-You need a Node.js environment to build this extension. Prefer Node.js 24.
+You need a Node.js environment to build this extension. Prefer Node.js 24 currently.
 
 1. Clone this repository
 2. Open extension page in Zed and install extension from directory
+
+## Configuration
+
+TODO
 
 ## Development
 
