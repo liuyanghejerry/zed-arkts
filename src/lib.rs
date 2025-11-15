@@ -56,8 +56,8 @@ impl zed::Extension for MyArkTSExtension {
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
 
-        let npm_package_installed_version = zed::npm_package_installed_version(&LANGUAGE_SERVER_NAME);
-        let npm_package_latest_version = zed::npm_package_latest_version(&LANGUAGE_SERVER_NAME);
+        let npm_package_installed_version = zed::npm_package_installed_version(LANGUAGE_SERVER_NAME);
+        let npm_package_latest_version = zed::npm_package_latest_version(LANGUAGE_SERVER_NAME);
 
         if npm_package_latest_version.is_err() {
             zed::set_language_server_installation_status(
