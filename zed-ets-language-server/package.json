@@ -8,11 +8,17 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "author": "liuyanghejerry <liuyanghejerry@126.com>",
   "license": "MIT",
   "dependencies": {
     "@arkts/language-server": "^1.2.2"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^4.0.9",
+    "vitest": "^4.0.9"
   }
 }
