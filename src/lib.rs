@@ -33,17 +33,19 @@ impl zed::Extension for MyArkTSExtension {
         Self { }
     }
 
-    fn language_server_workspace_configuration(
+    fn language_server_initialization_options(
         &mut self,
         _language_server_id: &LanguageServerId,
         worktree: &Worktree,
     ) -> Result<Option<Value>, String> {
-        let config = LspSettings::for_worktree("arkts-language-server", worktree)
+        let initialization_options = LspSettings::for_worktree("arkts-language-server", worktree)
             .ok()
-            .and_then(|settings| settings.settings.clone())
+            .and_then(|settings| settings.initialization_options)
             .unwrap_or_default();
 
-        Ok(Some(config))
+        println!("{:?}", initialization_options);
+
+        Ok(Some(initialization_options))
     }
 
     fn language_server_command(
