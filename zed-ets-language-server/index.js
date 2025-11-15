@@ -48,6 +48,7 @@ async function main() {
   });
 
   // Set up forwarding of process.stdin to serverProcess IPC
+  process.stdin.setEncoding('utf8');
   process.stdin.on('data', (data) => parse(data, async (message) => {
     // This special ets request is required in document: https://github.com/ohosvscode/arkTS/tree/next/packages/language-server
     // When this goes wrong, ETS UI decorators and functions will be type of any
@@ -65,24 +66,9 @@ async function main() {
             tsdk: initializationOptions.tsdk,
           },
           ohos: ohos,
-          // typescript: initializationOptions.typescript,
-          // ohos: initializationOptions.ohos,
-          // debug: initializationOptions.debug,
         },
       };
-      // const generalInitRequest = {
-      //   ...message,
-      //   params: {
-      //     ...message.params,
-      //     initializationOptions: {
-      //       ...message.params.initializationOptions,
-      //       typescript: {
-      //         tsdk: initializationOptions.tsdk,
-      //       },
-      //       ohos: ohos,
-      //     },
-      //   },
-      // };
+
       const generalInitRequest = message;
       generalInitRequest.params.initializationOptions.typescript = {
         tsdk: initializationOptions.tsdk,
