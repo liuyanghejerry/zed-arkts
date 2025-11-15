@@ -44,7 +44,23 @@ You need a Node.js environment to build this extension. Prefer Node.js 24 curren
 
 ## Configuration
 
-TODO
+All you need is to put language server settings in zed's `settings.json`:
+
+```json5
+{
+  "lsp": {
+    "arkts-language-server": {
+      "initialization_options": {
+        "tsdk": "/path/to/typescript/lib",
+        "ohosSdkPath": "/path/to/OpenHarmony/xx"
+      }
+    }
+  }
+}
+```
+
+- `tsdk`: Path to typescript declarations.
+- `ohosSdkPath` Path to certain Harmony SDK.
 
 ## Development
 
