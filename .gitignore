@@ -16,3 +16,8 @@ Thumbs.db
 *.bak
 *~
 /dist/
+node_modules
+extension.wasm
+grammars/
+*.log
+/.zed
