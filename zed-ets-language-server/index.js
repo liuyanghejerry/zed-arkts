@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { logger } from './lib/logger.js';
 import { parse } from './lib/data-parser.js';
+import { listHelperPaths } from './lib/lib-expander.js'
 
 // ETS language server path, passed by Rust extension process through environment variable
 const etsLangServerPath = process.env.ETS_LANG_SERVER;
@@ -47,25 +48,56 @@ async function main() {
   });
 
   // Set up forwarding of process.stdin to serverProcess IPC
-  process.stdin.on('data', (data) => parse(data, (message) => {
-    // Send message to language server via IPC
-    serverProcess.send(message);
+  process.stdin.on('data', (data) => parse(data, async (message) => {
     // This special ets request is required in document: https://github.com/ohosvscode/arkTS/tree/next/packages/language-server
     // When this goes wrong, ETS UI decorators and functions will be type of any
     if (message.method === 'initialize') {
       const { initializationOptions } = message.params;
+
+      const ohos = await listHelperPaths(initializationOptions.tsdk, initializationOptions.ohosSdkPath);
+
       const etsSpecialRequest = {
         jsonrpc: '2.0',
         id: Date.now(),
         method: 'ets/waitForEtsConfigurationChangedRequested',
         params: {
-          typescript: initializationOptions.typescript,
-          ohos: initializationOptions.ohos,
-          debug: initializationOptions.debug,
+          typescript: {
+            tsdk: initializationOptions.tsdk,
+          },
+          ohos: ohos,
+          // typescript: initializationOptions.typescript,
+          // ohos: initializationOptions.ohos,
+          // debug: initializationOptions.debug,
         },
       };
+      // const generalInitRequest = {
+      //   ...message,
+      //   params: {
+      //     ...message.params,
+      //     initializationOptions: {
+      //       ...message.params.initializationOptions,
+      //       typescript: {
+      //         tsdk: initializationOptions.tsdk,
+      //       },
+      //       ohos: ohos,
+      //     },
+      //   },
+      // };
+      const generalInitRequest = message;
+      generalInitRequest.params.initializationOptions.typescript = {
+        tsdk: initializationOptions.tsdk,
+      };
+      generalInitRequest.params.initializationOptions.ohos = ohos;
+      
+      logger.info(JSON.stringify(generalInitRequest));
+      logger.info(JSON.stringify(etsSpecialRequest));
+      
+      serverProcess.send(generalInitRequest);
       serverProcess.send(etsSpecialRequest);
+      return;
     }
+    // Send message to language server via IPC
+    serverProcess.send(message);
   }));
 
   // Error handling

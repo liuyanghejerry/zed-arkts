@@ -1,4 +1,4 @@
-import { logger } from './logger';
+import { logger } from './logger.js';
 
 let stdinBuffer = Buffer.alloc(0);
 
