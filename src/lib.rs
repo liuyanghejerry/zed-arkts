@@ -109,8 +109,9 @@ impl zed::Extension for MyArkTSExtension {
         // 将 ETS_SERVER_PATH 解析为绝对路径
         let ets_lang_server_abs_path = get_absolute_path(ETS_SERVER_PATH)?;
 
-        // 创建环境变量映射
-        let env = vec![("ETS_LANG_SERVER".to_string(), ets_lang_server_abs_path)];
+        // 创建环境变量映射，继承当前进程的所有环境变量并扩展
+        let mut env: Vec<(String, String)> = env::vars().collect();
+        env.push(("ETS_LANG_SERVER".to_string(), ets_lang_server_abs_path));
 
         Ok(zed::Command {
             command: zed::node_binary_path()?,
