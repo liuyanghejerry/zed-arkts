@@ -9,7 +9,8 @@ use zed_extension_api as zed;
 const LANGUAGE_SERVER_VERSION: &str = "latest";
 const LANGUAGE_SERVER_NAME: &str = "zed-ets-language-server";
 const ETS_SERVER_PATH: &str = "node_modules/@arkts/language-server/bin/ets-language-server.js";
-const SERVER_WRAPPER_PATH: &str = "node_modules/zed-ets-language-server/index.js";
+// 默认生产环境的路径
+const DEFAULT_SERVER_WRAPPER_PATH: &str = "node_modules/zed-ets-language-server/index.js";
 
 struct MyArkTSExtension { }
 
@@ -102,7 +103,9 @@ impl zed::Extension for MyArkTSExtension {
         }
 
         // 将 SERVER_WRAPPER_PATH 解析为绝对路径
-        let server_wrapper_abs_path = get_absolute_path(SERVER_WRAPPER_PATH)?;
+        let server_wrapper_path = env::var("ZED_ARKTS_SERVER_WRAPPER_PATH")
+            .unwrap_or_else(|_| DEFAULT_SERVER_WRAPPER_PATH.to_string());
+        let server_wrapper_abs_path = get_absolute_path(server_wrapper_path.as_str())?;
         // 将 ETS_SERVER_PATH 解析为绝对路径
         let ets_lang_server_abs_path = get_absolute_path(ETS_SERVER_PATH)?;
 

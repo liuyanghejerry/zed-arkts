@@ -21,3 +21,5 @@ extension.wasm
 grammars/
 *.log
 /.zed
+
+.env.local
