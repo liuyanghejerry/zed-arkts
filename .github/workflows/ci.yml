@@ -5,6 +5,9 @@ on:
     branches:
       - '**'  # Run on push to any branch
 
+permissions:
+  contents: read
+
 jobs:
   cargo-checks:
     name: Cargo Check and Build
