@@ -6,18 +6,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export function createSimpleLogger() {
-  // if (process.env.ZED_ETS_LANG_SERVER_LOG !== 'true') {
-  //   const noop = (_msg) => {};
-  //   return {
-  //     info: noop,
-  //     success: noop,
-  //     error: console.error,
-  //     warn: noop,
-  //     section: noop,
-  //     data: noop,
-  //     close: noop,
-  //   };
-  // }
+  if (process.env.ZED_ETS_LANG_SERVER_LOG !== 'true') {
+    const noop = (_msg) => {};
+    return {
+      info: noop,
+      success: noop,
+      error: console.error,
+      warn: noop,
+      section: noop,
+      data: noop,
+      close: noop,
+    };
+  }
   // Create log file write stream
   const logFilePath = path.join(__dirname, 'arkts-lsw.log');
   const logStream = fs.createWriteStream(logFilePath, { flags: 'w+' });
