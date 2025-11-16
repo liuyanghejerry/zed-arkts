@@ -6,7 +6,7 @@ use zed::Worktree;
 use zed::settings::LspSettings;
 use zed_extension_api as zed;
 
-const LANGUAGE_SERVER_VERSION: &str = "latest";
+const LANGUAGE_SERVER_VERSION: &str = "2";
 const LANGUAGE_SERVER_NAME: &str = "zed-ets-language-server";
 const ETS_SERVER_PATH: &str = "node_modules/@arkts/language-server/bin/ets-language-server.js";
 // 默认生产环境的路径
