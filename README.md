@@ -2,11 +2,15 @@
 
 A Zed extension for ArkTS (aka.ETS) development support.
 
-This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Million-mo/tree-sitter-arkts). Thanks for offering an excellent foundation for ArkTS highlighting.
+This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Million-mo/tree-sitter-arkts) and [ohosvscode/arkTS](https://github.com/ohosvscode/arkTS). Thanks for offering an excellent foundation for ArkTS.
 
 ## Features
 
 - **Syntax Highlighting**: Provides TypeScript-based syntax highlighting for ETS files
+- **Language Server**: Provides basic language server support, such as go to definition, and find references.
+
+![Module definition](assets/screenshot-1.jpg)
+![Symbol definition](assets/screenshot-1.jpg)
 
 ## Current Status
 
@@ -14,34 +18,49 @@ This is a **Zed language extension** that provides:
 
 - File type detection (`.ets` → ETS language)
 - Syntax highlighting extending TypeScript grammar
-- Proper Zed extension manifest and structure
+- Go to definition
+- Find references
+- Module definition
 
 ## Plans
-- Language server integration.
+- Compatible with more Node.js versions.
+- Autocomplete.
+- JSON5 schemas support for `oh-package.json5`.
+- Code actions, like formatting.
+
+## Non-goals
+- Debuggers.
+- Code snippets.
+- OpenHarmony SDK management.
 
 ## Installation
 
 ### From Source
 
-1. Install Rust: https://rustup.rs/
-2. Clone this repository
-3. Build the extension:
-   ```bash
-   ./build.sh
-   # or manually:
-   # cargo build --release
-   ```
-4. Copy the contents of `dist/` to your Zed extensions directory:
+You need a Node.js environment to build this extension. Prefer Node.js 24 currently.
 
-   ```
-   cp -r dist/* ~/.config/zed/extensions/arkts/
-   # or on macOS:
-   cp -r dist/* ~/Library/Application\ Support/Zed/extensions/arkts/
-   ```
+1. Clone this repository
+2. Open extension page in Zed and install extension from directory
 
-   - **Linux**: `~/.config/zed/extensions/`
-   - **macOS**: `~/Library/Application Support/Zed/extensions/`
-   - **Windows**: `%APPDATA%\Zed\extensions\`
+## Configuration
+
+All you need is to put language server settings in zed's `settings.json`:
+
+```json5
+{
+  "lsp": {
+    "arkts-language-server": {
+      "initialization_options": {
+        "tsdk": "/path/to/typescript/lib",
+        "ohosSdkPath": "/path/to/OpenHarmony/xx"
+      }
+    }
+  }
+}
+```
+
+- `tsdk`: Path to typescript declarations.
+- `ohosSdkPath` Path to certain Harmony SDK.
 
 ## Development
 

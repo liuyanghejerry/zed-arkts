@@ -1,0 +1,21 @@
+{
+  "name": "zed-ets-language-server",
+  "version": "2.0.0",
+  "description": "ETS language server wrapper for Zed ArkTS extension.",
+  "type": "module",
+  "main": "index.js",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "author": "liuyanghejerry <liuyanghejerry@126.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@arkts/language-server": "^1.2.2"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.9"
+  }
+}

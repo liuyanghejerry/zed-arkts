@@ -1,6 +1,7 @@
 [package]
-name = "arkts-zed"
-version = "0.1.0"
+name = "zed-arkts"
+version = "0.2.0"
+publish = false
 edition = "2021"
 description = "A Zed extension for ArkTS development"
 authors = ["liuyanghejerry <liuyanghejerry@126.com>"]
@@ -10,6 +11,4 @@ license = "MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-zed_extension_api = "0.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+zed_extension_api = "0.7.0"
