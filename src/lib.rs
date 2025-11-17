@@ -80,19 +80,19 @@ impl zed::Extension for MyArkTSExtension {
                         &zed::LanguageServerInstallationStatus::None,
                     );
                 } else {
-                    download_language_server()?;
                     zed::set_language_server_installation_status(
                         language_server_id,
                         &zed::LanguageServerInstallationStatus::Downloading,
                     );
+                    download_language_server()?;
                 }
             }
             Ok(None) => {
-                download_language_server()?;
                 zed::set_language_server_installation_status(
                     language_server_id,
                     &zed::LanguageServerInstallationStatus::Downloading,
                 );
+                download_language_server()?;
             }
             Err(err) => {
                 zed::set_language_server_installation_status(
