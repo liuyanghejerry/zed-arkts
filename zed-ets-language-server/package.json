@@ -13,7 +13,7 @@
   "author": "liuyanghejerry <liuyanghejerry@126.com>",
   "license": "MIT",
   "dependencies": {
-    "@arkts/language-server": "^1.2.2"
+    "@arkts/language-server": "^1.2.8"
   },
   "devDependencies": {
     "vitest": "^4.0.9"
