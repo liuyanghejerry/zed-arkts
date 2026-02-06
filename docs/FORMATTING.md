@@ -374,7 +374,155 @@ A: 可以禁用语言服务器的格式化功能，只使用外部工具：
 }
 ```
 
-## 10. 参考资源
+## 10. 自定义格式化命令与 LSP 集成
+
+### Zed 的格式化命令系统
+
+Zed **没有提供扩展级别的自定义格式化命令 API**。格式化功能完全通过配置实现，而不是通过扩展代码。这种设计有以下优点：
+
+1. **用户可控**：用户可以根据项目需求自由选择格式化工具
+2. **简化扩展开发**：扩展开发者无需实现格式化逻辑
+3. **统一配置**：所有格式化配置都在 `settings.json` 中管理
+
+### 格式化的优先级和集成
+
+虽然扩展不能直接提供格式化命令，但可以通过以下方式影响格式化行为：
+
+#### 1. LSP 格式化（自动集成）
+
+当扩展提供语言服务器时，如果该语言服务器实现了 LSP 格式化能力：
+- Zed 会自动检测并启用格式化功能
+- 用户无需额外配置即可使用
+- 这是**最推荐**的集成方式
+
+```rust
+// 扩展代码只需启动语言服务器
+impl zed::Extension for MyExtension {
+    fn language_server_command(&mut self, ...) -> Result<zed::Command> {
+        Ok(zed::Command {
+            command: "path/to/language-server",
+            args: vec!["--stdio"],
+            env: vec![],
+        })
+    }
+}
+```
+
+语言服务器的格式化能力会自动被 Zed 使用。
+
+#### 2. 用户配置外部格式化工具（覆盖 LSP）
+
+用户可以在 `settings.json` 中配置外部格式化工具，这会**覆盖**语言服务器的格式化：
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
+```
+
+#### 3. 代码操作与格式化协同
+
+代码操作（Code Actions）可以与格式化协同工作：
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.eslint": true
+      },
+      "formatter": "language_server"  // 或 "auto"
+    }
+  }
+}
+```
+
+执行顺序：
+1. 先执行代码操作（如组织 imports）
+2. 再执行格式化（外部工具或 LSP）
+
+### 格式化选择策略
+
+Zed 按以下优先级选择格式化方式：
+
+1. **用户明确配置的外部格式化工具** (`formatter.external`)
+2. **语言服务器提供的格式化** (如果 `formatter: "language_server"` 或 `"auto"`)
+3. **默认行为**：尝试使用语言服务器格式化
+
+```json
+// 格式化配置的不同模式
+{
+  "languages": {
+    "ArkTS Language": {
+      // 模式 1: 自动选择（默认）
+      "formatter": "auto",  // 优先使用 LSP，如果可用
+      
+      // 模式 2: 仅使用语言服务器
+      "formatter": "language_server",
+      
+      // 模式 3: 使用外部工具
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      
+      // 模式 4: 禁用格式化
+      "formatter": []
+    }
+  }
+}
+```
+
+### 扩展开发者的建议
+
+对于 ArkTS 扩展开发者：
+
+1. **确保语言服务器提供格式化功能**
+   - 这是最简单和最有效的方式
+   - 用户可以立即使用，无需额外配置
+
+2. **在文档中说明如何配置替代格式化工具**
+   - 提供 Prettier、ESLint 等工具的配置示例
+   - 说明何时应该使用外部工具而不是 LSP
+
+3. **不要尝试在扩展代码中实现格式化**
+   - Zed 的扩展 API 不支持自定义格式化命令
+   - 所有格式化应该通过 LSP 或用户配置实现
+
+### 实际案例：ArkTS 的格式化支持
+
+ArkTS 扩展的格式化工作流程：
+
+```
+用户保存文件
+    ↓
+Zed 检查 settings.json
+    ↓
+是否配置了外部格式化工具？
+    ├─ 是 → 使用外部工具（如 Prettier）
+    └─ 否 → 检查语言服务器是否支持格式化
+           ├─ 是 → 使用 LSP 格式化（ArkTS LS 提供）
+           └─ 否 → 跳过格式化
+```
+
+由于 ArkTS 语言服务器基于 TypeScript 语言服务器，它已经内置了格式化功能，因此：
+- **开箱即用**：用户安装扩展后即可使用格式化
+- **可自定义**：用户可以配置 Prettier 等工具覆盖默认行为
+- **无需扩展代码**：所有格式化逻辑由 LSP 或外部工具处理
+
+## 11. 参考资源
 
 - [Zed Language Extensions 文档](https://zed.dev/docs/extensions/languages)
 - [Language Server Protocol 规范](https://microsoft.github.io/language-server-protocol/)

@@ -370,7 +370,155 @@ A: Disable language server formatting and use only external tools:
 }
 ```
 
-## 10. References
+## 10. Custom Formatting Commands and LSP Integration
+
+### Zed's Formatting Command System
+
+Zed **does not provide extension-level custom formatting command APIs**. Formatting functionality is entirely configuration-based, not implemented through extension code. This design has the following advantages:
+
+1. **User Control**: Users can freely choose formatting tools based on project needs
+2. **Simplified Extension Development**: Extension developers don't need to implement formatting logic
+3. **Unified Configuration**: All formatting configuration is managed in `settings.json`
+
+### Formatting Priority and Integration
+
+While extensions cannot directly provide formatting commands, they can influence formatting behavior through:
+
+#### 1. LSP Formatting (Automatic Integration)
+
+When an extension provides a language server that implements LSP formatting capabilities:
+- Zed automatically detects and enables formatting
+- Users can use it immediately without additional configuration
+- This is the **recommended** integration approach
+
+```rust
+// Extension code only needs to start the language server
+impl zed::Extension for MyExtension {
+    fn language_server_command(&mut self, ...) -> Result<zed::Command> {
+        Ok(zed::Command {
+            command: "path/to/language-server",
+            args: vec!["--stdio"],
+            env: vec![],
+        })
+    }
+}
+```
+
+The language server's formatting capability is automatically used by Zed.
+
+#### 2. User-Configured External Formatter (Overrides LSP)
+
+Users can configure external formatting tools in `settings.json`, which **overrides** language server formatting:
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      }
+    }
+  }
+}
+```
+
+#### 3. Code Actions Working with Formatting
+
+Code Actions can work alongside formatting:
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.eslint": true
+      },
+      "formatter": "language_server"  // or "auto"
+    }
+  }
+}
+```
+
+Execution order:
+1. Execute code actions first (e.g., organize imports)
+2. Then execute formatting (external tool or LSP)
+
+### Formatting Selection Strategy
+
+Zed selects formatting methods in this priority order:
+
+1. **User-explicitly configured external formatter** (`formatter.external`)
+2. **Language server-provided formatting** (if `formatter: "language_server"` or `"auto"`)
+3. **Default behavior**: Attempt to use language server formatting
+
+```json
+// Different formatting configuration modes
+{
+  "languages": {
+    "ArkTS Language": {
+      // Mode 1: Auto-select (default)
+      "formatter": "auto",  // Prefer LSP if available
+      
+      // Mode 2: Use only language server
+      "formatter": "language_server",
+      
+      // Mode 3: Use external tool
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}"]
+        }
+      },
+      
+      // Mode 4: Disable formatting
+      "formatter": []
+    }
+  }
+}
+```
+
+### Recommendations for Extension Developers
+
+For ArkTS extension developers:
+
+1. **Ensure the language server provides formatting capability**
+   - This is the simplest and most effective approach
+   - Users can use it immediately without additional configuration
+
+2. **Document how to configure alternative formatting tools**
+   - Provide configuration examples for Prettier, ESLint, etc.
+   - Explain when external tools should be used instead of LSP
+
+3. **Don't try to implement formatting in extension code**
+   - Zed's extension API doesn't support custom formatting commands
+   - All formatting should be implemented through LSP or user configuration
+
+### Real-World Example: ArkTS Formatting Support
+
+ArkTS extension formatting workflow:
+
+```
+User saves file
+    ↓
+Zed checks settings.json
+    ↓
+Is external formatter configured?
+    ├─ Yes → Use external tool (e.g., Prettier)
+    └─ No → Check if language server supports formatting
+           ├─ Yes → Use LSP formatting (provided by ArkTS LS)
+           └─ No → Skip formatting
+```
+
+Since the ArkTS language server is based on TypeScript language server, it has built-in formatting:
+- **Works out of the box**: Users can format immediately after installing the extension
+- **Customizable**: Users can configure Prettier or other tools to override default behavior
+- **No extension code needed**: All formatting logic is handled by LSP or external tools
+
+## 11. References
 
 - [Zed Language Extensions Documentation](https://zed.dev/docs/extensions/languages)
 - [Language Server Protocol Specification](https://microsoft.github.io/language-server-protocol/)

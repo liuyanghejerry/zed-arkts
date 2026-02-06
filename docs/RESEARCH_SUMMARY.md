@@ -7,7 +7,15 @@
 
 ## Key Findings
 
-### 1. Three Main Formatting Approaches
+### 1. No Custom Formatting Command API
+
+**Important Discovery**: Zed does **not** provide extension-level custom formatting command APIs. Formatting is entirely configuration-based:
+
+- Extensions cannot implement custom formatting commands
+- All formatting is done through LSP or user-configured external tools
+- This design gives users full control over formatting behavior
+
+### 2. Three Main Formatting Approaches
 
 Zed's language extension system supports code formatting through three primary mechanisms:
 
@@ -55,13 +63,26 @@ prettier_parser_name = "typescript"
 }
 ```
 
-### 3. Extension Implementation
+### 3. Extension Implementation and LSP Integration
 
-The ArkTS extension already supports formatting through:
+**How Extensions Integrate with Formatting**:
+
+The ArkTS extension supports formatting through:
 
 1. **Language Server**: The `arkts-language-server` (based on TypeScript LS) provides built-in formatting
+   - Extensions only need to start the language server via `language_server_command`
+   - Zed automatically detects LSP formatting capabilities
+   - No additional extension code required for formatting
+
 2. **Configuration**: Users can override with external tools via settings
+   - External formatters override LSP formatting
+   - Users have complete control
+
 3. **Flexibility**: Multiple formatting strategies can coexist
+   - Code actions + external formatter + LSP formatting
+   - Users choose their preferred workflow
+
+**Key Insight**: Extensions influence formatting by providing a capable language server, not by implementing formatting commands themselves.
 
 ### 4. Execution Order
 
