@@ -194,18 +194,6 @@ prettier_parser_name = "typescript"
 }
 ```
 
-### 保留手动格式化
-
-```json
-{
-  "languages": {
-    "ArkTS Language": {
-      "format_on_save": "off"
-    }
-  }
-}
-```
-
 这样配置后，保存时不会自动格式化，但仍可以手动执行格式化命令。
 
 ## 6. ArkTS 扩展的格式化实现建议
