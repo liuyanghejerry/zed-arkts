@@ -21,12 +21,12 @@ This is a **Zed language extension** that provides:
 - Go to definition
 - Find references
 - Module definition
+- Code formatting support (via Language Server or external tools)
 
 ## Plans
 - Compatible with more Node.js versions.
 - Autocomplete.
 - JSON5 schemas support for `oh-package.json5`.
-- Code actions, like formatting.
 
 ## Non-goals
 - Debuggers.
@@ -61,6 +61,35 @@ All you need is to put language server settings in zed's `settings.json`:
 
 - `tsdk`: Path to typescript declarations.
 - `ohosSdkPath` Path to certain Harmony SDK.
+
+### Code Formatting
+
+The extension supports code formatting through multiple methods. See [docs/FORMATTING.md](docs/FORMATTING.md) for detailed information.
+
+#### Using Language Server Formatting
+
+The ArkTS language server provides built-in formatting support. No additional configuration is required.
+
+#### Using External Formatters (e.g., Prettier)
+
+You can configure external formatters in your `settings.json`:
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--parser", "typescript"]
+        }
+      }
+    }
+  }
+}
+```
+
+For more formatting options and configuration examples, please refer to [docs/FORMATTING.md](docs/FORMATTING.md).
 
 ## Development
 
