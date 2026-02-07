@@ -259,7 +259,6 @@ npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslin
 
 ## 参考资源
 
-- [完整格式化文档](FORMATTING.md)
 - [Prettier 文档](https://prettier.io/docs/en/index.html)
 - [ESLint 文档](https://eslint.org/docs/latest/)
 - [Zed 设置参考](https://zed.dev/docs/reference/all-settings)

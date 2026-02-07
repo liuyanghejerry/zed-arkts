@@ -105,10 +105,8 @@ When multiple formatting methods are configured:
 
 ## Documentation Created
 
-1. **FORMATTING.md** (Chinese) - Comprehensive guide to formatting support
-2. **FORMATTING_EN.md** (English) - Full English documentation
-3. **FORMATTING_EXAMPLES.md** (Chinese) - Practical configuration examples
-4. **Updated README.md** - Added formatting section
+1. **FORMATTING_EXAMPLES.md** (Chinese) - Practical configuration examples
+2. **Updated README.md** - Added formatting section
 
 ## Code Changes
 
