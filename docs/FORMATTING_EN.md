@@ -45,6 +45,20 @@ impl zed::Extension for MyExtension {
 
 If the language server implements formatting, Zed will automatically detect and enable it.
 
+### ArkTS Custom Formatting Implementation
+
+The ArkTS language server uses a custom `ets/formatDocument` request instead of the standard LSP `textDocument/formatting`. To integrate with Zed's standard formatting system, this extension's language server wrapper (`zed-ets-language-server`) automatically forwards standard LSP formatting requests to the ArkTS custom formatting endpoint.
+
+**Forwarding Mechanism**:
+- When Zed sends a `textDocument/formatting` request, the wrapper converts it to an `ets/formatDocument` request
+- When Zed sends a `textDocument/rangeFormatting` request, it is also converted to an `ets/formatDocument` request
+- Formatting results are returned to Zed in the standard LSP `TextEdit[]` format
+
+This implementation ensures that:
+- Users can use Zed's standard formatting commands
+- No special configuration is required
+- Full compatibility with ArkTS language server formatting capabilities
+
 ## 2. External Formatter
 
 ### Configuration

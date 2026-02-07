@@ -45,6 +45,20 @@ impl zed::Extension for MyExtension {
 
 如果语言服务器实现了格式化功能，Zed 会自动检测并启用。
 
+### ArkTS 的自定义格式化实现
+
+ArkTS 语言服务器使用自定义的 `ets/formatDocument` 请求而不是标准的 LSP `textDocument/formatting`。为了与 Zed 的标准格式化系统集成，本扩展的语言服务器包装器（`zed-ets-language-server`）会自动将标准的 LSP 格式化请求转发到 ArkTS 的自定义格式化端点。
+
+**转发机制**：
+- 当 Zed 发送 `textDocument/formatting` 请求时，包装器将其转换为 `ets/formatDocument` 请求
+- 当 Zed 发送 `textDocument/rangeFormatting` 请求时，同样转换为 `ets/formatDocument` 请求
+- 格式化结果以标准 LSP `TextEdit[]` 格式返回给 Zed
+
+这种实现方式使得：
+- 用户可以使用 Zed 的标准格式化命令
+- 不需要任何特殊配置
+- 完全兼容 ArkTS 语言服务器的格式化能力
+
 ## 2. 外部格式化工具
 
 ### 配置方式

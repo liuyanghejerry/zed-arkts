@@ -68,7 +68,7 @@ The extension supports code formatting through multiple methods. See [docs/FORMA
 
 #### Using Language Server Formatting
 
-The ArkTS language server provides built-in formatting support. No additional configuration is required.
+The ArkTS language server provides built-in formatting support through the custom `ets/formatDocument` request. The extension automatically forwards standard LSP formatting requests to this custom endpoint, so no additional configuration is required. Simply use Zed's standard formatting commands (e.g., format on save or manual format).
 
 #### Using External Formatters (e.g., Prettier)
 
