@@ -3,7 +3,3 @@ grammar = "arkts"
 path_suffixes = ["ets"]
 line_comments = ["// "]
 tab_size = 2
-hard_tabs = false
-
-# Prettier parser name for external formatting
-prettier_parser_name = "typescript"
