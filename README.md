@@ -64,7 +64,7 @@ All you need is to put language server settings in zed's `settings.json`:
 
 ### Code Formatting
 
-The extension supports code formatting through multiple methods. See [docs/FORMATTING_EXAMPLES.md](docs/FORMATTING_EXAMPLES.md) for configuration examples.
+The extension supports code formatting through the language server.
 
 #### Using Language Server Formatting
 
@@ -88,8 +88,6 @@ You can configure external formatters in your `settings.json`:
   }
 }
 ```
-
-For more formatting options and configuration examples, please refer to [docs/FORMATTING_EXAMPLES.md](docs/FORMATTING_EXAMPLES.md).
 
 ## Development
 

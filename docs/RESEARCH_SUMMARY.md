@@ -105,12 +105,11 @@ When multiple formatting methods are configured:
 
 ## Documentation Created
 
-1. **FORMATTING_EXAMPLES.md** (Chinese) - Practical configuration examples
-2. **Updated README.md** - Added formatting section
+1. **Updated README.md** - Added formatting section
 
 ## Code Changes
 
-1. **languages/arkts/config.toml** - Added `prettier_parser_name` and `hard_tabs` settings
+1. **zed-ets-language-server/index.js** - Added forwarding of LSP formatting requests to ets/formatDocument
 2. **README.md** - Added formatting feature and configuration examples
 
 ## Key Takeaways
