@@ -77,25 +77,57 @@ cargo build --release
 
 ## Testing
 
-This project includes comprehensive automated testing for the LSP implementation.
+This project includes comprehensive **fully automated** testing for the LSP implementation.
 
-### Quick Start
+### Full E2E Automation (完全自动化)
 
 ```bash
-# Run all tests (builds extension + runs LSP tests)
-./scripts/run-lsp-tests.sh
+# Complete end-to-end automated test (no manual steps!)
+# 完全自动化端到端测试（无需人工操作！）
+./scripts/e2e-automated-test.sh
+```
 
-# Run unit tests only
+This script automatically:
+1. ✅ Installs Zed editor
+2. ✅ Installs OpenHarmony SDK (mock version)
+3. ✅ Builds and installs the extension
+4. ✅ Runs automated LSP tests
+5. ✅ Validates results programmatically
+
+### Individual Automation Scripts
+
+```bash
+# Install Zed automatically
+./scripts/auto-install-zed.sh
+
+# Install extension automatically
+./scripts/auto-install-local-extension.sh
+
+# Install OpenHarmony SDK (mock for testing)
+./scripts/install-mock-ohos-sdk.sh
+
+# Run automated LSP tests (no GUI required)
+./scripts/test-lsp-automated.sh
+```
+
+### Unit & Integration Tests
+
+```bash
+# Run all unit tests
 cd zed-ets-language-server
 npm test
 
 # Run integration tests
 npm run test:integration
+
+# Run with coverage
+npm run test -- --coverage
 ```
 
 ### Documentation
 
 For detailed information about testing:
+- [Full Automation Guide (完全自动化指南)](docs/FULL_AUTOMATION.md) ⭐ NEW
 - [Testing Guide (English)](docs/TESTING_EN.md)
 - [测试指南 (中文)](docs/TESTING.md)
 
