@@ -131,13 +131,16 @@ function parseLSPMessages(buffer) {
 }
 
 function updateResults(test, status, data) {
-  results.tests[test].status = status;
-  results.tests[test].data = data;
-  results.summary.pending--;
-  if (status === 'passed') {
-    results.summary.passed++;
-  } else if (status === 'failed') {
-    results.summary.failed++;
+  // Only update if the test hasn't been updated yet (prevent duplicates)
+  if (results.tests[test].status === 'pending') {
+    results.tests[test].status = status;
+    results.tests[test].data = data;
+    results.summary.pending--;
+    if (status === 'passed') {
+      results.summary.passed++;
+    } else if (status === 'failed') {
+      results.summary.failed++;
+    }
   }
 }
 
@@ -225,7 +228,7 @@ const runNextTest = () => {
     case 1:
       // Initialize
       setTimeout(() => {
-        console.log('[1/5] Sending initialize request...');
+        console.log('[1/6] Sending initialize request...');
         const initMsg = createLSPMessage({
           jsonrpc: '2.0',
           id: 1,
@@ -254,7 +257,7 @@ const runNextTest = () => {
     case 2:
       // Initialized notification
       setTimeout(() => {
-        console.log('[2/5] Sending initialized notification...');
+        console.log('[2/6] Sending initialized notification...');
         const initializedMsg = createLSPMessage({
           jsonrpc: '2.0',
           method: 'initialized',
@@ -268,7 +271,7 @@ const runNextTest = () => {
     case 3:
       // Open file
       setTimeout(() => {
-        console.log('[3/5] Opening test file...');
+        console.log('[3/6] Opening test file...');
         try {
           const fileContent = readFileSync(`${projectDir}/src/main.ets`, 'utf8');
           const didOpenMsg = createLSPMessage({
@@ -294,7 +297,7 @@ const runNextTest = () => {
     case 4:
       // Request definition
       setTimeout(() => {
-        console.log('[4/5] Requesting definition...');
+        console.log('[4/6] Requesting definition...');
         const defMsg = createLSPMessage({
           jsonrpc: '2.0',
           id: 2,
@@ -312,7 +315,7 @@ const runNextTest = () => {
     case 5:
       // Request references
       setTimeout(() => {
-        console.log('[5/5] Requesting references...');
+        console.log('[5/6] Requesting references...');
         const refMsg = createLSPMessage({
           jsonrpc: '2.0',
           id: 3,
@@ -329,6 +332,24 @@ const runNextTest = () => {
       break;
       
     case 6:
+      // Request completion
+      setTimeout(() => {
+        console.log('[6/6] Requesting completion...');
+        const completionMsg = createLSPMessage({
+          jsonrpc: '2.0',
+          id: 4,
+          method: 'textDocument/completion',
+          params: {
+            textDocument: { uri: `file://${projectDir}/src/main.ets` },
+            position: { line: 3, character: 10 }
+          }
+        });
+        server.stdin.write(completionMsg);
+        runNextTest();
+      }, 2500);
+      break;
+      
+    case 7:
       // Finalize and save results
       setTimeout(() => {
         console.log('\n=== Finalizing results ===');
