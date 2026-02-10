@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:unit": "vitest run lib/",
     "test:integration": "vitest run tests/integration/",
+    "test:formatting": "vitest run tests/integration/formatting.test.js",
     "test:watch": "vitest"
   },
   "author": "liuyanghejerry <liuyanghejerry@126.com>",

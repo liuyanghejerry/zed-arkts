@@ -156,7 +156,30 @@ This script automatically:
 
 # Run automated LSP tests (no GUI required)
 ./scripts/test-lsp-automated.sh
+
+# Run formatting-specific tests
+./scripts/test-formatting.sh
 ```
+
+### Code Formatting Tests
+
+The project includes dedicated automated tests for the code formatting functionality:
+
+```bash
+# Run formatting tests only
+cd zed-ets-language-server
+npm run test:formatting
+
+# Or use the shell script
+./scripts/test-formatting.sh
+```
+
+The formatting tests verify:
+- ✅ Standard LSP formatting requests are forwarded to `ets/formatDocument`
+- ✅ Range formatting requests are properly handled
+- ✅ Formatting options (tab size, spaces vs tabs) are preserved
+- ✅ Multiple sequential formatting requests work correctly
+- ✅ Edge cases and various formatting configurations
 
 ### Unit & Integration Tests
 
