@@ -163,7 +163,7 @@ This script automatically:
 
 ### Code Formatting Tests
 
-The project includes dedicated automated tests for the code formatting functionality:
+The project includes comprehensive automated tests for the code formatting functionality with **actual content validation**:
 
 ```bash
 # Run formatting tests only
@@ -175,11 +175,19 @@ npm run test:formatting
 ```
 
 The formatting tests verify:
+- ✅ **Actual formatting results**: Validates that unformatted code becomes properly formatted
+- ✅ **TextEdit application**: Verifies that formatting edits produce expected output
 - ✅ Standard LSP formatting requests are forwarded to `ets/formatDocument`
 - ✅ Range formatting requests are properly handled
-- ✅ Formatting options (tab size, spaces vs tabs) are preserved
+- ✅ Formatting options (tab size, spaces vs tabs) are preserved and applied correctly
 - ✅ Multiple sequential formatting requests work correctly
+- ✅ Formatted code is syntactically valid with proper indentation
 - ✅ Edge cases and various formatting configurations
+
+**Test Suite**: 24 comprehensive test cases including:
+- Content validation tests that check actual formatted output
+- LSP protocol forwarding tests
+- TextEdit structure and application tests
 
 ### Unit & Integration Tests
 
