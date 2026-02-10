@@ -75,6 +75,34 @@ cargo build --release
 ./build.sh
 ```
 
+## Testing
+
+This project includes comprehensive automated testing for the LSP implementation.
+
+### Quick Start
+
+```bash
+# Run all tests (builds extension + runs LSP tests)
+./scripts/run-lsp-tests.sh
+
+# Run unit tests only
+cd zed-ets-language-server
+npm test
+
+# Run integration tests
+npm run test:integration
+```
+
+### Documentation
+
+For detailed information about testing:
+- [Testing Guide (English)](docs/TESTING_EN.md)
+- [测试指南 (中文)](docs/TESTING.md)
+
+### Sample Project
+
+A sample ArkTS project is provided in `test-fixtures/arkts-sample-project/` for manual and automated testing. See [Sample Project README](test-fixtures/arkts-sample-project/README.md) for details.
+
 ## License
 
 MIT License - see LICENSE file for details

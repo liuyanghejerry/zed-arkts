@@ -8,7 +8,10 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run lib/",
+    "test:integration": "vitest run tests/integration/",
+    "test:watch": "vitest"
   },
   "author": "liuyanghejerry <liuyanghejerry@126.com>",
   "license": "MIT",
