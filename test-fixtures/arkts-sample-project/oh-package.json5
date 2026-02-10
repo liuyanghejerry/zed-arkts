@@ -1,0 +1,17 @@
+{
+  "name": "arkts-sample-project",
+  "version": "1.0.0",
+  "description": "Sample ArkTS project for testing Zed extension",
+  "main": "src/main.ets",
+  "ohos": {
+    "org": "com.example",
+    "buildTool": "hvigor"
+  },
+  "dependencies": {
+    "@ohos/axios": "^2.0.0",
+    "@ohos/lodash": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}
