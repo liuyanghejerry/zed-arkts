@@ -91,8 +91,28 @@ This script automatically:
 1. ✅ Installs Zed editor
 2. ✅ Installs OpenHarmony SDK (mock version)
 3. ✅ Builds and installs the extension
-4. ✅ Runs automated LSP tests
-5. ✅ Validates results programmatically
+4. ✅ **Verifies Zed-LSP integration** (real Zed CLI if available, simulation otherwise)
+5. ✅ Runs automated LSP tests
+6. ✅ Validates results programmatically
+
+### Testing with Real Zed (真实 Zed 测试)
+
+**NEW**: Test with actual Zed CLI and log analysis!
+
+```bash
+# Test using real Zed editor (if installed)
+# 使用真实 Zed 编辑器测试（如果已安装）
+./scripts/test-zed-real.sh
+
+# This script:
+# - Launches actual Zed with test files
+# - Monitors Zed's log files in real-time
+# - Detects extension loading and LSP startup
+# - Extracts LSP messages from logs
+# - Falls back to simulation if Zed unavailable
+```
+
+See `docs/ZED_CLI_TESTING.md` for detailed documentation on Zed CLI testing approaches.
 
 ### Individual Automation Scripts
 
@@ -105,6 +125,12 @@ This script automatically:
 
 # Install OpenHarmony SDK (mock for testing)
 ./scripts/install-mock-ohos-sdk.sh
+
+# Test with real Zed CLI (NEW!)
+./scripts/test-zed-real.sh
+
+# Test Zed-LSP integration (simulation)
+./scripts/test-zed-integration.sh
 
 # Run automated LSP tests (no GUI required)
 ./scripts/test-lsp-automated.sh
