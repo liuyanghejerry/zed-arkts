@@ -24,9 +24,7 @@ echo ""
 if ! command -v zed &> /dev/null; then
     echo -e "${RED}✗ Zed is not installed or not in PATH${NC}"
     echo "Please install Zed first: ./scripts/auto-install-zed.sh"
-    echo ""
-    echo -e "${YELLOW}Falling back to simulation mode...${NC}"
-    exec ./scripts/test-zed-integration.sh "$PROJECT_DIR" "$RESULTS_FILE"
+    exit 1
 fi
 
 ZED_VERSION=$(zed --version 2>&1 || echo "unknown")

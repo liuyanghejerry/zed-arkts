@@ -47,20 +47,20 @@ chmod +x scripts/auto-install-local-extension.sh
 ./scripts/auto-install-local-extension.sh
 echo -e "${GREEN}✓ Step 4 complete${NC}\n"
 
-# 步骤5: 验证 Zed-LSP 集成
-CURRENT_STEP="5/7 - Verifying Zed-LSP integration"
+# 步骤5: 验证 Zed-LSP 集成（使用真实 Zed）
+CURRENT_STEP="5/7 - Verifying Zed-LSP integration with real Zed"
 echo -e "${YELLOW}[$CURRENT_STEP]${NC}"
 
-# 优先使用真实 Zed CLI 测试（如果可用）
-if command -v zed &> /dev/null; then
-    echo "Using real Zed CLI for integration testing..."
-    chmod +x scripts/test-zed-real.sh
-    ./scripts/test-zed-real.sh "$(pwd)/test-fixtures/arkts-sample-project" "/tmp/zed-integration-results.json" || true
-else
-    echo "Zed not available, using simulation mode..."
-    chmod +x scripts/test-zed-integration.sh
-    ./scripts/test-zed-integration.sh "$(pwd)/test-fixtures/arkts-sample-project" "/tmp/zed-integration-results.json"
+# 只使用真实 Zed CLI 测试
+if ! command -v zed &> /dev/null; then
+    echo -e "${RED}✗ Zed is not installed${NC}"
+    echo "Please run: ./scripts/auto-install-zed.sh"
+    exit 1
 fi
+
+echo "Using real Zed CLI for integration testing..."
+chmod +x scripts/test-zed-real.sh
+./scripts/test-zed-real.sh "$(pwd)/test-fixtures/arkts-sample-project" "/tmp/zed-integration-results.json"
 echo -e "${GREEN}✓ Step 5 complete${NC}\n"
 
 # 步骤6: 运行自动化 LSP 测试

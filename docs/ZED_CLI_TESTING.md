@@ -7,9 +7,9 @@ This document explains how to test the Zed extension using the real Zed editor C
 
 本文档说明如何使用真实的 Zed 编辑器 CLI 和日志分析来测试扩展，而不是模拟。
 
-## Testing Approaches / 测试方法
+## Testing Approach / 测试方法
 
-### 1. Real Zed CLI Testing (Preferred) / 真实 Zed CLI 测试（推荐）
+### Real Zed CLI Testing / 真实 Zed CLI 测试
 
 **Script**: `scripts/test-zed-real.sh`
 
@@ -18,14 +18,14 @@ This document explains how to test the Zed extension using the real Zed editor C
 - Monitors Zed's log files in real-time
 - Detects extension loading and LSP startup
 - Extracts LSP messages from logs
-- Falls back to simulation if Zed is unavailable
+- Requires Zed to be installed
 
 **工作原理**：
 - 启动真实的 Zed 编辑器并打开测试文件
 - 实时监控 Zed 的日志文件
 - 检测扩展加载和 LSP 启动
 - 从日志中提取 LSP 消息
-- 如果 Zed 不可用，回退到模拟模式
+- 需要安装 Zed
 
 **Usage:**
 ```bash
@@ -35,27 +35,6 @@ This document explains how to test the Zed extension using the real Zed editor C
 **Log Locations:**
 - Linux: `~/.local/share/zed/logs/Zed.log`
 - macOS: `~/Library/Logs/Zed/Zed.log`
-
-### 2. Simulated Integration Testing / 模拟集成测试
-
-**Script**: `scripts/test-zed-integration.sh`
-
-**How it works:**
-- Simulates how Zed launches the extension wrapper
-- Tests LSP communication through the extension
-- Validates capabilities without requiring Zed GUI
-- Always available (doesn't need Zed installed)
-
-**工作原理**：
-- 模拟 Zed 如何启动扩展包装器
-- 通过扩展测试 LSP 通信
-- 验证功能而无需 Zed GUI
-- 始终可用（无需安装 Zed）
-
-**Usage:**
-```bash
-./scripts/test-zed-integration.sh [project_dir] [results_file]
-```
 
 ## Zed CLI Commands / Zed 命令行命令
 
@@ -148,25 +127,13 @@ LSP-related:
 
 ## Integration with E2E Tests / 集成到 E2E 测试
 
-The E2E test script (`e2e-automated-test.sh`) automatically:
-1. Checks if Zed is available
-2. Uses real Zed CLI test if available
-3. Falls back to simulation if Zed is not installed
+The E2E test script (`e2e-automated-test.sh`) requires Zed to be installed and uses real Zed CLI testing.
 
-E2E 测试脚本（`e2e-automated-test.sh`）会自动：
-1. 检查 Zed 是否可用
-2. 如果可用，使用真实的 Zed CLI 测试
-3. 如果 Zed 未安装，回退到模拟模式
+E2E 测试脚本（`e2e-automated-test.sh`）需要安装 Zed，并使用真实的 Zed CLI 测试。
 
 ```bash
-# Step 5 in E2E test
-if command -v zed &> /dev/null; then
-    # Use real Zed
-    ./scripts/test-zed-real.sh
-else
-    # Use simulation
-    ./scripts/test-zed-integration.sh
-fi
+# Step 5 in E2E test - requires Zed
+./scripts/test-zed-real.sh
 ```
 
 ## Advantages / 优势
@@ -176,12 +143,7 @@ fi
 - ✅ Validates real-world behavior
 - ✅ Detects Zed-specific issues
 - ✅ Reads actual Zed logs
-
-### Simulation Testing / 模拟测试
-- ✅ Works in CI/CD environments
-- ✅ Doesn't require GUI
-- ✅ Faster execution
-- ✅ More predictable results
+- ✅ Verifies extension loading in production environment
 
 ## Troubleshooting / 故障排除
 
