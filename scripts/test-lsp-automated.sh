@@ -32,6 +32,46 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
+# 验证语言服务器是否安装
+ETS_SERVER_PATH="node_modules/@arkts/language-server/bin/ets-language-server.js"
+if [ ! -f "$ETS_SERVER_PATH" ]; then
+    echo -e "${RED}✗ Language server not found at $ETS_SERVER_PATH${NC}"
+    echo "Please run: npm install"
+    exit 1
+fi
+
+# 设置环境变量
+export ETS_LANG_SERVER="$(pwd)/$ETS_SERVER_PATH"
+echo "Language server: $ETS_LANG_SERVER"
+
+# 设置 OHOS SDK 路径（如果未设置）
+if [ -z "$OHOS_SDK_PATH" ]; then
+    export OHOS_SDK_PATH="/tmp/mock-openharmony-sdk"
+    echo "Using default OHOS_SDK_PATH: $OHOS_SDK_PATH"
+    
+    # 如果 mock SDK 不存在，创建它
+    if [ ! -d "$OHOS_SDK_PATH" ]; then
+        echo "Creating mock OpenHarmony SDK..."
+        ../scripts/install-mock-ohos-sdk.sh "$OHOS_SDK_PATH"
+    fi
+fi
+
+# 设置 TypeScript 路径（如果未设置）
+if [ -z "$TSDK" ]; then
+    # 尝试查找 TypeScript
+    if [ -d "/usr/local/lib/node_modules/typescript/lib" ]; then
+        export TSDK="/usr/local/lib/node_modules/typescript/lib"
+    elif [ -d "node_modules/typescript/lib" ]; then
+        export TSDK="$(pwd)/node_modules/typescript/lib"
+    else
+        # 安装 TypeScript 作为开发依赖
+        echo "Installing TypeScript..."
+        npm install --no-save typescript
+        export TSDK="$(pwd)/node_modules/typescript/lib"
+    fi
+    echo "Using TSDK: $TSDK"
+fi
+
 # 创建测试脚本
 cat > /tmp/lsp-automated-test.mjs << 'EOJS'
 import { spawn } from 'child_process';
@@ -104,7 +144,11 @@ function updateResults(test, status, data) {
 console.log('Starting LSP server...');
 
 const server = spawn('node', ['index.js'], {
-  stdio: ['pipe', 'pipe', 'pipe']
+  stdio: ['pipe', 'pipe', 'pipe'],
+  env: {
+    ...process.env,
+    ETS_LANG_SERVER: process.env.ETS_LANG_SERVER
+  }
 });
 
 let outputBuffer = '';
@@ -189,6 +233,10 @@ const runNextTest = () => {
           params: {
             processId: process.pid,
             rootUri: `file://${projectDir}`,
+            initializationOptions: {
+              tsdk: process.env.TSDK || '/usr/local/lib/node_modules/typescript/lib',
+              ohosSdkPath: process.env.OHOS_SDK_PATH || '/tmp/mock-openharmony-sdk'
+            },
             capabilities: {
               textDocument: {
                 definition: { linkSupport: true },

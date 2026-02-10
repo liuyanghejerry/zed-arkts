@@ -13,7 +13,7 @@ MOCK_SDK_DIR="${1:-/tmp/mock-openharmony-sdk}"
 echo -e "${YELLOW}Creating mock OpenHarmony SDK at $MOCK_SDK_DIR...${NC}"
 
 # 创建目录结构
-mkdir -p "$MOCK_SDK_DIR/"{api,toolchains,ets/lib,previewer,build-tools}
+mkdir -p "$MOCK_SDK_DIR/"{api,toolchains,ets/lib,ets/build-tools/ets-loader/declarations,ets/component,previewer,build-tools}
 
 # 创建 API 定义
 cat > "$MOCK_SDK_DIR/api/common.d.ts" << 'EOF'
@@ -132,6 +132,10 @@ case "$1" in
 esac
 EOF
 chmod +x "$MOCK_SDK_DIR/toolchains/ohpm"
+
+# 创建占位符文件避免警告
+touch "$MOCK_SDK_DIR/ets/build-tools/ets-loader/declarations/.gitkeep"
+touch "$MOCK_SDK_DIR/ets/component/.gitkeep"
 
 echo -e "${GREEN}✓ Mock OpenHarmony SDK created successfully!${NC}"
 echo ""
