@@ -112,8 +112,6 @@ This script automatically:
 # - Requires Zed to be installed
 ```
 
-See `docs/ZED_CLI_TESTING.md` for detailed documentation on Zed CLI testing approaches.
-
 ### Individual Automation Scripts
 
 ```bash
@@ -149,14 +147,12 @@ npm run test -- --coverage
 
 ### Documentation
 
-For detailed information about testing:
-- [Full Automation Guide (完全自动化指南)](docs/FULL_AUTOMATION.md) ⭐ NEW
-- [Testing Guide (English)](docs/TESTING_EN.md)
-- [测试指南 (中文)](docs/TESTING.md)
+For detailed information about the automated testing design:
+- [Automation Design (自动化设计)](docs/AUTOMATION_DESIGN.md) - High-level design overview
 
 ### Sample Project
 
-A sample ArkTS project is provided in `test-fixtures/arkts-sample-project/` for manual and automated testing. See [Sample Project README](test-fixtures/arkts-sample-project/README.md) for details.
+A sample ArkTS project is provided in `test-fixtures/arkts-sample-project/` for testing. See [Sample Project README](test-fixtures/arkts-sample-project/README.md) for details.
 
 ## License
 
