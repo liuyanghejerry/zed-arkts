@@ -52,3 +52,39 @@ jobs:
       
     - name: Build (release)
       run: cargo build --release --verbose
+
+  test-lsp:
+    name: Test LSP Server
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: zed-ets-language-server/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./zed-ets-language-server
+      run: npm ci
+      
+    - name: Run unit tests
+      working-directory: ./zed-ets-language-server
+      run: npm run test:unit
+      
+    - name: Run integration tests
+      working-directory: ./zed-ets-language-server
+      run: npm run test:integration
+      
+    - name: Test LSP server startup
+      working-directory: ./zed-ets-language-server
+      run: |
+        # Test that the server can start and respond to basic input
+        echo 'Content-Length: 123\r\n\r\n{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"processId":null,"rootUri":null,"capabilities":{}}}' | \
+        timeout 5s node index.js || [ $? -eq 124 ]

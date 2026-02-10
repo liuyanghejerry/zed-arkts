@@ -102,6 +102,85 @@ cargo build --release
 ./build.sh
 ```
 
+## Testing
+
+This project includes comprehensive **fully automated** testing for the LSP implementation.
+
+### Full E2E Automation (完全自动化)
+
+```bash
+# Complete end-to-end automated test (no manual steps!)
+# 完全自动化端到端测试（无需人工操作！）
+./scripts/e2e-automated-test.sh
+```
+
+This script automatically:
+1. ✅ Installs Zed editor
+2. ✅ Installs OpenHarmony SDK (mock version)
+3. ✅ Builds and installs the extension
+4. ✅ **Verifies Zed-LSP integration using real Zed CLI**
+5. ✅ Runs automated LSP tests
+6. ✅ Validates results programmatically
+
+### Testing with Real Zed (真实 Zed 测试)
+
+**Test with actual Zed CLI and log analysis!**
+
+```bash
+# Test using real Zed editor
+# 使用真实 Zed 编辑器测试
+./scripts/test-zed-real.sh
+
+# This script:
+# - Launches actual Zed with test files
+# - Monitors Zed's log files in real-time
+# - Detects extension loading and LSP startup
+# - Extracts LSP messages from logs
+# - Requires Zed to be installed
+```
+
+### Individual Automation Scripts
+
+```bash
+# Install Zed automatically
+./scripts/auto-install-zed.sh
+
+# Install extension automatically
+./scripts/auto-install-local-extension.sh
+
+# Install OpenHarmony SDK (mock for testing)
+./scripts/install-mock-ohos-sdk.sh
+
+# Test with real Zed CLI
+./scripts/test-zed-real.sh
+
+# Run automated LSP tests (no GUI required)
+./scripts/test-lsp-automated.sh
+```
+
+### Unit & Integration Tests
+
+```bash
+# Run all unit tests
+cd zed-ets-language-server
+npm test
+
+# Run integration tests
+npm run test:integration
+
+# Run with coverage
+npm run test -- --coverage
+```
+
+### Documentation
+
+For detailed information about the automated testing design:
+- [Automation Design (自动化设计)](docs/AUTOMATION_DESIGN.md) - High-level design overview
+
+### Sample Project
+
+A sample ArkTS project is provided in `test-fixtures/arkts-sample-project/` for testing. See [Sample Project README](test-fixtures/arkts-sample-project/README.md) for details.
+
 ## License
 
 MIT License - see LICENSE file for details
