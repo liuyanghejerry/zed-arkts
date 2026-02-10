@@ -47,15 +47,22 @@ chmod +x scripts/auto-install-local-extension.sh
 ./scripts/auto-install-local-extension.sh
 echo -e "${GREEN}✓ Step 4 complete${NC}\n"
 
-# 步骤5: 运行自动化 LSP 测试
-CURRENT_STEP="5/6 - Running automated LSP tests"
+# 步骤5: 验证 Zed-LSP 集成
+CURRENT_STEP="5/7 - Verifying Zed-LSP integration"
+echo -e "${YELLOW}[$CURRENT_STEP]${NC}"
+chmod +x scripts/test-zed-integration.sh
+./scripts/test-zed-integration.sh "$(pwd)/test-fixtures/arkts-sample-project" "/tmp/zed-integration-results.json"
+echo -e "${GREEN}✓ Step 5 complete${NC}\n"
+
+# 步骤6: 运行自动化 LSP 测试
+CURRENT_STEP="6/7 - Running automated LSP tests"
 echo -e "${YELLOW}[$CURRENT_STEP]${NC}"
 chmod +x scripts/test-lsp-automated.sh
 ./scripts/test-lsp-automated.sh "$(pwd)/test-fixtures/arkts-sample-project" "/tmp/lsp-e2e-results.json"
-echo -e "${GREEN}✓ Step 5 complete${NC}\n"
+echo -e "${GREEN}✓ Step 6 complete${NC}\n"
 
-# 步骤6: 验证结果
-CURRENT_STEP="6/6 - Validating results"
+# 步骤7: 验证结果
+CURRENT_STEP="7/7 - Validating results"
 echo -e "${YELLOW}[$CURRENT_STEP]${NC}"
 
 if [ -f /tmp/lsp-e2e-results.json ]; then
@@ -115,9 +122,30 @@ else
     STATUS_COLOR=$RED
 fi
 
-echo -e "${GREEN}✓ Step 6 complete${NC}\n"
+echo -e "${GREEN}✓ Step 7 complete${NC}\n"
+
+# 验证集成测试结果
+echo ""
+echo "Integration Test Results:"
+if [ -f /tmp/zed-integration-results.json ] && command -v jq &> /dev/null; then
+    INT_PASSED=$(jq -r '.summary.passed' /tmp/zed-integration-results.json)
+    INT_FAILED=$(jq -r '.summary.failed' /tmp/zed-integration-results.json)
+    
+    echo "  Extension Start: $(jq -r '.integration.extensionStart.status' /tmp/zed-integration-results.json)"
+    echo "  LSP Communication: $(jq -r '.integration.lspCommunication.status' /tmp/zed-integration-results.json)"
+    echo "  Capabilities Check: $(jq -r '.integration.capabilities.status' /tmp/zed-integration-results.json)"
+    
+    if [ "$INT_FAILED" -gt 0 ]; then
+        echo -e "  ${RED}✗ Integration tests failed${NC}"
+        OVERALL_STATUS="FAILED"
+        STATUS_COLOR=$RED
+    else
+        echo -e "  ${GREEN}✓ Integration tests passed${NC}"
+    fi
+fi
 
 # 最终总结
+echo ""
 echo -e "${BLUE}=========================================${NC}"
 echo -e "${STATUS_COLOR}  Overall Status: $OVERALL_STATUS${NC}"
 echo -e "${BLUE}=========================================${NC}"
@@ -126,10 +154,13 @@ echo "Summary:"
 echo "  ✓ Zed installed and configured"
 echo "  ✓ OpenHarmony SDK (mock) installed"
 echo "  ✓ Extension built and installed"
+echo "  ✓ Zed-LSP integration verified"
 echo "  ✓ LSP automated tests executed"
 echo "  ✓ Results validated"
 echo ""
-echo "Results file: /tmp/lsp-e2e-results.json"
+echo "Results files:"
+echo "  - Integration: /tmp/zed-integration-results.json"
+echo "  - LSP Tests: /tmp/lsp-e2e-results.json"
 echo ""
 
 if [ "$OVERALL_STATUS" = "PASSED" ]; then
