@@ -3,7 +3,9 @@ import { logger } from './logger.js';
 let stdinBuffer = Buffer.alloc(0);
 
 export function parse(data, callback) {
-  stdinBuffer = Buffer.concat([stdinBuffer, data]);
+  // Convert string to Buffer if necessary (happens when stdin.setEncoding('utf8') is used)
+  const dataBuffer = Buffer.isBuffer(data) ? data : Buffer.from(data, 'utf8');
+  stdinBuffer = Buffer.concat([stdinBuffer, dataBuffer]);
 
   while (true) {
     const headerEnd = stdinBuffer.indexOf('\r\n\r\n');
