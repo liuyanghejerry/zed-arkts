@@ -48,7 +48,12 @@ async function main() {
   });
 
   // Set up forwarding of process.stdin to serverProcess IPC
-  process.stdin.setEncoding('utf8');
+  // Note: We intentionally do NOT call setEncoding('utf8') here because:
+  // 1. LSP Content-Length is measured in bytes, not characters
+  // 2. TCP data can be split at arbitrary byte boundaries, including mid-multibyte UTF-8
+  // 3. If setEncoding('utf8') is used and data splits mid-character, the decoder may
+  //    produce replacement characters or corrupt the byte boundary tracking
+  // By keeping stdin as raw Buffer, data-parser.js can correctly track byte positions
   process.stdin.on('data', (data) => parse(data, async (message) => {
     // This special ets request is required in document: https://github.com/ohosvscode/arkTS/tree/next/packages/language-server
     // When this goes wrong, ETS UI decorators and functions will be type of any
