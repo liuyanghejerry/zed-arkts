@@ -2,9 +2,9 @@ name: E2E Automated Testing
 
 on:
   push:
-    branches: [ main, develop, copilot/** ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: ["*"]
   workflow_dispatch:  # 允许手动触发
 
 env:
@@ -18,35 +18,35 @@ jobs:
       matrix:
         os: [ubuntu-latest]  # macOS 需要 Zed 的 GUI，暂时只用 Linux
       fail-fast: false
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
         cache-dependency-path: zed-ets-language-server/package-lock.json
-        
+
     - name: Setup Rust
       uses: actions-rust-lang/setup-rust-toolchain@v1
       with:
         toolchain: stable
-        
+
     - name: Install system dependencies
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
         sudo apt-get install -y curl wget jq
-        
+
     # 步骤1: 安装 Zed
     - name: Install Zed
       run: |
         chmod +x scripts/auto-install-zed.sh
         ./scripts/auto-install-zed.sh || echo "Zed installation attempted"
-        
+
     - name: Verify Zed installation
       run: |
         if command -v zed &> /dev/null; then
@@ -54,7 +54,7 @@ jobs:
         else
           echo "⚠ Zed not available (may not support CI environment)"
         fi
-        
+
     # 步骤2: 安装 OpenHarmony SDK (Mock)
     - name: Install OpenHarmony SDK (Mock)
       run: |
@@ -62,22 +62,22 @@ jobs:
         ./scripts/install-mock-ohos-sdk.sh /tmp/mock-openharmony-sdk
       env:
         OHOS_SDK_PATH: /tmp/mock-openharmony-sdk
-        
+
     # 步骤3: 构建扩展
     - name: Build extension
       run: cargo build --release --verbose
-      
+
     # 步骤4: 安装扩展
     - name: Install extension
       run: |
         chmod +x scripts/auto-install-local-extension.sh
         ./scripts/auto-install-local-extension.sh
-        
+
     # 步骤5: 安装 LSP 依赖
     - name: Install LSP dependencies
       working-directory: ./zed-ets-language-server
       run: npm ci
-      
+
     # 步骤6: 验证 Zed-LSP 集成（使用真实 Zed）
     - name: Verify Zed-LSP integration with real Zed
       env:
@@ -90,7 +90,7 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           sleep 2
         fi
-        
+
         # 使用真实 Zed 进行测试
         chmod +x scripts/test-zed-real.sh
         ./scripts/test-zed-real.sh \
@@ -100,7 +100,7 @@ jobs:
           echo "Zed requires a display server to run properly"
           exit 0
         }
-      
+
     # 步骤7: 运行自动化 LSP 测试
     - name: Run automated LSP tests
       env:
@@ -110,7 +110,7 @@ jobs:
         ./scripts/test-lsp-automated.sh \
           "$(pwd)/test-fixtures/arkts-sample-project" \
           "/tmp/lsp-e2e-results.json"
-        
+
     # 步骤8: 验证结果
     - name: Validate results
       if: always()
@@ -121,13 +121,13 @@ jobs:
           INT_PASSED=$(jq -r '.summary.passed' /tmp/zed-integration-results.json)
           echo "Integration tests passed: $INT_PASSED/3"
         fi
-        
+
         echo ""
         echo "=== LSP Test Results ==="
         if [ -f /tmp/lsp-e2e-results.json ]; then
           echo "=== Test Results ==="
           cat /tmp/lsp-e2e-results.json | jq '.'
-          
+
           # 检查是否有通过的测试
           PASSED=$(jq -r '.summary.passed' /tmp/lsp-e2e-results.json)
           if [ "$PASSED" -gt 0 ]; then
@@ -141,7 +141,7 @@ jobs:
           echo "✗ No results file found"
           exit 1
         fi
-        
+
     # 上传测试结果
     - name: Upload test results
       if: always()
@@ -153,7 +153,7 @@ jobs:
           /tmp/lsp-e2e-results.json
           /tmp/lsp-test-results.json
         if-no-files-found: warn
-        
+
     # 上传构建产物
     - name: Upload extension artifact
       if: success()
@@ -172,17 +172,17 @@ jobs:
     name: E2E with Real SDK (Optional)
     runs-on: ubuntu-latest
     if: false  # 默认禁用，需要时启用
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Download OpenHarmony SDK
       run: |
         # 这里需要实际的 SDK 下载链接
         echo "Downloading real OpenHarmony SDK..."
         # wget <SDK_URL>
-        
+
     - name: Run E2E tests
       run: |
         chmod +x scripts/e2e-automated-test.sh
