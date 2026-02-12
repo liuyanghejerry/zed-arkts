@@ -81,7 +81,11 @@ jobs:
     - name: Run integration tests
       working-directory: ./zed-ets-language-server
       run: npm run test:integration
-      
+
+    - name: Run formatting tests
+      working-directory: ./zed-ets-language-server
+      run: npm run test:formatting
+
     - name: Test LSP server startup
       working-directory: ./zed-ets-language-server
       run: |

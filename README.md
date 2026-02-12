@@ -156,9 +156,6 @@ This script automatically:
 
 # Run automated LSP tests (no GUI required)
 ./scripts/test-lsp-automated.sh
-
-# Run formatting-specific tests
-./scripts/test-formatting.sh
 ```
 
 ### Code Formatting Tests
@@ -169,9 +166,6 @@ The project includes comprehensive automated tests for the code formatting funct
 # Run formatting tests only
 cd zed-ets-language-server
 npm run test:formatting
-
-# Or use the shell script
-./scripts/test-formatting.sh
 ```
 
 The formatting tests verify:
