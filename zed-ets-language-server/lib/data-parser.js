@@ -28,7 +28,7 @@ export function parse(data, callback) {
       const message = JSON.parse(messageJson);
       callback(message);
     } catch (error) {
-      logger.error(`Error parsing message: ${error.message} ${error.stack}`);
+      logger.error(`Error parsing message: ${error.message} ${error.stack} ${messageJson}`);
     }
   }
 }
