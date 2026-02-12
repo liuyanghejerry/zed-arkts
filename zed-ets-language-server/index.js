@@ -82,6 +82,43 @@ async function main() {
       serverProcess.send(etsSpecialRequest);
       return;
     }
+
+    // Forward standard formatting requests to custom ets/formatDocument
+    if (message.method === 'textDocument/formatting') {
+      const etsFormatRequest = {
+        jsonrpc: message.jsonrpc,
+        id: message.id,
+        method: 'ets/formatDocument',
+        params: {
+          textDocument: message.params.textDocument,
+          options: message.params.options,
+        },
+      };
+      
+      logger.info(`Forwarding formatting request to ets/formatDocument: ${JSON.stringify(etsFormatRequest)}`);
+      serverProcess.send(etsFormatRequest);
+      return;
+    }
+
+    // Forward range formatting requests to custom ets/formatDocument
+    // Note: ets/formatDocument doesn't support range formatting explicitly,
+    // so we forward it as a full document format request
+    if (message.method === 'textDocument/rangeFormatting') {
+      const etsFormatRequest = {
+        jsonrpc: message.jsonrpc,
+        id: message.id,
+        method: 'ets/formatDocument',
+        params: {
+          textDocument: message.params.textDocument,
+          options: message.params.options,
+        },
+      };
+      
+      logger.info(`Forwarding range formatting request to ets/formatDocument: ${JSON.stringify(etsFormatRequest)}`);
+      serverProcess.send(etsFormatRequest);
+      return;
+    }
+
     // Send message to language server via IPC
     serverProcess.send(message);
   }));

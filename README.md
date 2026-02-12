@@ -21,12 +21,12 @@ This is a **Zed language extension** that provides:
 - Go to definition
 - Find references
 - Module definition
+- Code formatting support (via Language Server or external tools)
 
 ## Plans
 - Compatible with more Node.js versions.
 - Autocomplete.
 - JSON5 schemas support for `oh-package.json5`.
-- Code actions, like formatting.
 
 ## Non-goals
 - Debuggers.
@@ -61,6 +61,33 @@ All you need is to put language server settings in zed's `settings.json`:
 
 - `tsdk`: Path to typescript declarations.
 - `ohosSdkPath` Path to certain Harmony SDK.
+
+### Code Formatting
+
+The extension supports code formatting through the language server.
+
+#### Using Language Server Formatting
+
+The ArkTS language server provides built-in formatting support through the custom `ets/formatDocument` request. The extension automatically forwards standard LSP formatting requests to this custom endpoint, so no additional configuration is required. Simply use Zed's standard formatting commands (e.g., format on save or manual format).
+
+#### Using External Formatters (e.g., Prettier)
+
+You can configure external formatters in your `settings.json`:
+
+```json
+{
+  "languages": {
+    "ArkTS Language": {
+      "formatter": {
+        "external": {
+          "command": "prettier",
+          "arguments": ["--stdin-filepath", "{buffer_path}", "--parser", "typescript"]
+        }
+      }
+    }
+  }
+}
+```
 
 ## Development
 
@@ -130,6 +157,31 @@ This script automatically:
 # Run automated LSP tests (no GUI required)
 ./scripts/test-lsp-automated.sh
 ```
+
+### Code Formatting Tests
+
+The project includes comprehensive automated tests for the code formatting functionality with **actual content validation**:
+
+```bash
+# Run formatting tests only
+cd zed-ets-language-server
+npm run test:formatting
+```
+
+The formatting tests verify:
+- ✅ **Actual formatting results**: Validates that unformatted code becomes properly formatted
+- ✅ **TextEdit application**: Verifies that formatting edits produce expected output
+- ✅ Standard LSP formatting requests are forwarded to `ets/formatDocument`
+- ✅ Range formatting requests are properly handled
+- ✅ Formatting options (tab size, spaces vs tabs) are preserved and applied correctly
+- ✅ Multiple sequential formatting requests work correctly
+- ✅ Formatted code is syntactically valid with proper indentation
+- ✅ Edge cases and various formatting configurations
+
+**Test Suite**: 24 comprehensive test cases including:
+- Content validation tests that check actual formatted output
+- LSP protocol forwarding tests
+- TextEdit structure and application tests
 
 ### Unit & Integration Tests
 
