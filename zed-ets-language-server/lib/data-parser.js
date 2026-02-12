@@ -1,40 +1,37 @@
 import { logger } from './logger.js';
 
-let stdinBuffer = '';
+let stdinBuffer = Buffer.alloc(0);
 
 export function parse(data, callback) {
-  stdinBuffer += data.toString();
+  stdinBuffer = Buffer.concat([stdinBuffer, data]);
 
   while (true) {
-    // Find Content-Length header
-    const lengthMatch = stdinBuffer.match(/Content-Length: (\d+)\r\n/);
+    const headerEnd = stdinBuffer.indexOf('\r\n\r\n');
+    if (headerEnd === -1) break;
+
+    const headerPart = stdinBuffer.subarray(0, headerEnd).toString('utf8');
+    const lengthMatch = headerPart.match(/Content-Length: (\d+)/);
     if (!lengthMatch) break;
 
     const contentLength = Number.parseInt(lengthMatch[1]);
-    const headerEnd = stdinBuffer.indexOf('\r\n\r\n');
-
-    if (headerEnd === -1) break;
-
     const messageStart = headerEnd + 4;
     const messageEnd = messageStart + contentLength;
 
     if (stdinBuffer.length < messageEnd) break;
 
-    // Extract message
-    const messageJson = stdinBuffer.substring(messageStart, messageEnd);
-    stdinBuffer = stdinBuffer.substring(messageEnd);
+    const messageJson = stdinBuffer.subarray(messageStart, messageEnd).toString('utf8');
+    stdinBuffer = stdinBuffer.subarray(messageEnd);
 
     try {
       const message = JSON.parse(messageJson);
       callback(message);
     } catch (error) {
-      logger.error(`Error parsing message: ${error.message} ${error.stack} ${messageJson}`);
-      // Clear buffer on parse error to prevent corruption from leftover data
-      stdinBuffer = '';
+      logger.error(`Error parsing message: ${error.message}`);
+      stdinBuffer = Buffer.alloc(0);
     }
   }
 }
 
 export function clearBuffer() {
-  stdinBuffer = '';
+  stdinBuffer = Buffer.alloc(0);
 }

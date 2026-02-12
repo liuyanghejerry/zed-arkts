@@ -233,6 +233,149 @@ describe('data-parser', () => {
 
       parse(data, callback);
     });
+
+    describe('UTF-8 byte length handling', () => {
+      it('should correctly parse messages with Chinese characters (multi-byte UTF-8)', (done) => {
+        // This test specifically targets the bug where Content-Length (bytes) 
+        // was incorrectly treated as character count
+        const message = {
+          jsonrpc: '2.0',
+          method: 'textDocument/didOpen',
+          params: {
+            textDocument: {
+              uri: 'file:///test.ets',
+              languageId: 'arkts',
+              text: '// 简单的ETS示例 - 基础语法演示\nconst APP_NAME: string = \'ETS应用\';'
+            }
+          }
+        };
+        
+        const messageJson = JSON.stringify(message);
+        // Content-Length must be byte length, not character length
+        const byteLength = Buffer.byteLength(messageJson, 'utf8');
+        const data = Buffer.from(`Content-Length: ${byteLength}\r\n\r\n${messageJson}`);
+        
+        const callback = vi.fn((parsedMessage) => {
+          expect(parsedMessage).toEqual(message);
+          expect(callback).toHaveBeenCalledTimes(1);
+          done();
+        });
+
+        parse(data, callback);
+      });
+
+      it('should handle message where char length != byte length followed by another message', () => {
+        // Regression test: multiple messages with Chinese content
+        // Previously, the second message header would be incorrectly included in the first
+        const message1 = {
+          jsonrpc: '2.0',
+          method: 'textDocument/didOpen',
+          params: {
+            textDocument: {
+              uri: 'file:///测试文件.ets',
+              text: 'const 中文变量 = "测试内容包含多字节字符";'
+            }
+          }
+        };
+        const message2 = {
+          jsonrpc: '2.0',
+          method: 'textDocument/publishDiagnostics',
+          params: {
+            uri: 'file:///测试文件.ets',
+            diagnostics: []
+          }
+        };
+        
+        const messageJson1 = JSON.stringify(message1);
+        const messageJson2 = JSON.stringify(message2);
+        const byteLength1 = Buffer.byteLength(messageJson1, 'utf8');
+        const byteLength2 = Buffer.byteLength(messageJson2, 'utf8');
+        
+        const data = Buffer.from(
+          `Content-Length: ${byteLength1}\r\n\r\n${messageJson1}` +
+          `Content-Length: ${byteLength2}\r\n\r\n${messageJson2}`
+        );
+        
+        const callback = vi.fn();
+        parse(data, callback);
+
+        expect(callback).toHaveBeenCalledTimes(2);
+        expect(callback).toHaveBeenNthCalledWith(1, message1);
+        expect(callback).toHaveBeenNthCalledWith(2, message2);
+      });
+
+      it('should correctly calculate byte length for emoji characters', (done) => {
+        // Emojis are 4 bytes each in UTF-8
+        const message = {
+          jsonrpc: '2.0',
+          method: 'textDocument/didOpen',
+          params: {
+            textDocument: {
+              uri: 'file:///test.ets',
+              text: '🚀🎯💻🎉🎊' // 5 emojis = 20 bytes
+            }
+          }
+        };
+        
+        const messageJson = JSON.stringify(message);
+        const byteLength = Buffer.byteLength(messageJson, 'utf8');
+        const data = Buffer.from(`Content-Length: ${byteLength}\r\n\r\n${messageJson}`);
+        
+        const callback = vi.fn((parsedMessage) => {
+          expect(parsedMessage).toEqual(message);
+          done();
+        });
+
+        parse(data, callback);
+      });
+
+      it('should verify byte length differs from char length for non-ASCII', () => {
+        // This test documents why the Buffer-based fix was necessary
+        const text = '中文测试 🚀 émoji';
+        const charLength = text.length;
+        const byteLength = Buffer.byteLength(text, 'utf8');
+        
+        // Verify that byte length > char length for non-ASCII
+        expect(byteLength).toBeGreaterThan(charLength);
+        
+        // Create a message with this text
+        const message = { jsonrpc: '2.0', method: 'test', params: { text } };
+        const messageJson = JSON.stringify(message);
+        const data = Buffer.from(`Content-Length: ${Buffer.byteLength(messageJson, 'utf8')}\r\n\r\n${messageJson}`);
+        
+        const callback = vi.fn();
+        parse(data, callback);
+        
+        expect(callback).toHaveBeenCalledWith(message);
+      });
+
+      it('should handle partial message split at multi-byte character boundary', (done) => {
+        // Simulate TCP fragmentation that splits in the middle of a multi-byte character
+        const message = {
+          jsonrpc: '2.0',
+          method: 'test',
+          params: { text: '测试中文字符' }
+        };
+        const messageJson = JSON.stringify(message);
+        const byteLength = Buffer.byteLength(messageJson, 'utf8');
+        const fullData = Buffer.from(`Content-Length: ${byteLength}\r\n\r\n${messageJson}`);
+        
+        // Split at a position that cuts through a multi-byte character
+        const splitPoint = fullData.indexOf('测试') + 3; // Middle of '测' or '试'
+        const part1 = fullData.subarray(0, splitPoint);
+        const part2 = fullData.subarray(splitPoint);
+        
+        const callback = vi.fn((parsedMessage) => {
+          expect(parsedMessage).toEqual(message);
+          done();
+        });
+
+        parse(part1, callback);
+        expect(callback).not.toHaveBeenCalled();
+        
+        parse(part2, callback);
+      });
+    });
   });
 
   describe('clearBuffer', () => {
