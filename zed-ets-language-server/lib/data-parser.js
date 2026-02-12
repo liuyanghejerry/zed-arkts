@@ -29,6 +29,8 @@ export function parse(data, callback) {
       callback(message);
     } catch (error) {
       logger.error(`Error parsing message: ${error.message} ${error.stack} ${messageJson}`);
+      // Clear buffer on parse error to prevent corruption from leftover data
+      stdinBuffer = '';
     }
   }
 }
