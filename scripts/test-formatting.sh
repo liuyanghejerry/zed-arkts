@@ -27,7 +27,7 @@ echo "Running formatting-specific tests..."
 echo ""
 
 # Run only the formatting tests
-npx vitest run tests/integration/formatting.test.js
+npm run test:formatting
 
 echo ""
 echo "================================"
