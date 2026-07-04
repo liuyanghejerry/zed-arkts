@@ -53,7 +53,17 @@ async function main() {
     // This special ets request is required in document: https://github.com/ohosvscode/arkTS/tree/next/packages/language-server
     // When this goes wrong, ETS UI decorators and functions will be type of any
     if (message.method === 'initialize') {
-      const { initializationOptions } = message.params;
+      const initializationOptions = message.params?.initializationOptions;
+
+      // The ETS-specific setup below needs both tsdk and ohosSdkPath. When they are
+      // not configured (e.g. no OHOS SDK set in the editor's LSP settings), skip the
+      // ETS special request and forward the initialize as-is, so the language server
+      // still starts instead of the wrapper crashing on `undefined.tsdk`.
+      if (!initializationOptions?.tsdk || !initializationOptions?.ohosSdkPath) {
+        logger.error(`Missing initializationOptions.tsdk/ohosSdkPath; forwarding initialize without ETS setup. Got: ${JSON.stringify(initializationOptions)}`);
+        serverProcess.send(message);
+        return;
+      }
 
       const ohos = await listHelperPaths(initializationOptions.tsdk, initializationOptions.ohosSdkPath);
 
