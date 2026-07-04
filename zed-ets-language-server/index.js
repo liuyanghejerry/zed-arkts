@@ -57,6 +57,8 @@ async function main() {
 
       const ohos = await listHelperPaths(initializationOptions.tsdk, initializationOptions.ohosSdkPath);
 
+      // Send both `ohos` and `ets` keys to stay compatible with
+      // @arkts/language-server v1.2.x (uses `ohos`) and v1.3.x+ (uses `ets`).
       const etsSpecialRequest = {
         jsonrpc: '2.0',
         id: Date.now(),
@@ -66,6 +68,7 @@ async function main() {
             tsdk: initializationOptions.tsdk,
           },
           ohos: ohos,
+          ets: ohos,
         },
       };
 
@@ -74,6 +77,7 @@ async function main() {
         tsdk: initializationOptions.tsdk,
       };
       generalInitRequest.params.initializationOptions.ohos = ohos;
+      generalInitRequest.params.initializationOptions.ets = ohos;
       
       logger.info(JSON.stringify(generalInitRequest));
       logger.info(JSON.stringify(etsSpecialRequest));
