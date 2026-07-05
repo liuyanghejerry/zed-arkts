@@ -6,7 +6,9 @@ use zed::Worktree;
 use zed::settings::LspSettings;
 use zed_extension_api as zed;
 
-const LANGUAGE_SERVER_VERSION: &str = "2";
+// The wrapper npm package major version this extension is compatible with; used
+// as the npm install range, so installs resolve to the latest release within it.
+const LANGUAGE_SERVER_VERSION: &str = "3";
 const LANGUAGE_SERVER_NAME: &str = "zed-ets-language-server";
 const ETS_SERVER_PATH: &str = "node_modules/@arkts/language-server/bin/ets-language-server.js";
 // 默认生产环境的路径
@@ -59,22 +61,24 @@ impl zed::Extension for MyArkTSExtension {
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
 
-        let npm_package_installed_version = zed::npm_package_installed_version(LANGUAGE_SERVER_NAME);
-        let npm_package_latest_version = zed::npm_package_latest_version(LANGUAGE_SERVER_NAME);
+        // Only track releases within the pinned major (LANGUAGE_SERVER_VERSION).
+        // npm's overall latest may belong to a major this extension doesn't
+        // support — comparing against it would reinstall on every startup and
+        // never converge. A failed latest lookup (e.g. offline) is fine as long
+        // as a wrapper of the right major is already installed.
+        let latest_version = zed::npm_package_latest_version(LANGUAGE_SERVER_NAME).ok();
+        let latest_in_pinned_major = latest_version
+            .filter(|version| version.split('.').next() == Some(LANGUAGE_SERVER_VERSION));
 
-        if npm_package_latest_version.is_err() {
-            zed::set_language_server_installation_status(
-                language_server_id,
-                &zed::LanguageServerInstallationStatus::Failed("Failed to fetch latest version of zed-ets-language-server".to_string()),
-            );
-            return Err("Failed to fetch latest version of zed-ets-language-server".to_string());
-        }
-
-        let npm_package_latest_version = npm_package_latest_version.unwrap();
-
-        match npm_package_installed_version {
-            Ok(Some(version)) => {
-                if version == npm_package_latest_version {
+        match zed::npm_package_installed_version(LANGUAGE_SERVER_NAME) {
+            Ok(Some(installed_version)) => {
+                let major_matches =
+                    installed_version.split('.').next() == Some(LANGUAGE_SERVER_VERSION);
+                let up_to_date = major_matches
+                    && latest_in_pinned_major
+                        .as_ref()
+                        .is_none_or(|latest| latest == &installed_version);
+                if up_to_date {
                     zed::set_language_server_installation_status(
                         language_server_id,
                         &zed::LanguageServerInstallationStatus::None,
