@@ -2,6 +2,7 @@
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { logger } from './lib/logger.js';
 import { parse } from './lib/data-parser.js';
@@ -14,6 +15,26 @@ const etsLangServerPath = process.env.ETS_LANG_SERVER;
 // usable tsdk can be derived from the server path when settings don't name one:
 // <work dir>/node_modules/@arkts/language-server/bin/ets-language-server.js
 // <work dir>/node_modules/ohos-typescript/lib
+// @arkts/language-server v1.3+ refuses to initialize unless ets.sdkPath points at
+// a directory containing ets/build-tools/ets-loader/tsconfig.json (v1.2 accepted
+// any value). Provide a minimal skeleton so the server starts without a real SDK;
+// ArkUI typings degrade but TypeScript-level features keep working.
+function ensurePlaceholderSdk() {
+  const sdkDir = path.join(os.tmpdir(), 'zed-ets-empty-ohos-sdk');
+  const etsLoaderDir = path.join(sdkDir, 'ets', 'build-tools', 'ets-loader');
+  try {
+    fs.mkdirSync(path.join(etsLoaderDir, 'declarations'), { recursive: true });
+    fs.mkdirSync(path.join(sdkDir, 'ets', 'component'), { recursive: true });
+    const tsconfigPath = path.join(etsLoaderDir, 'tsconfig.json');
+    if (!fs.existsSync(tsconfigPath)) {
+      fs.writeFileSync(tsconfigPath, '{}\n');
+    }
+  } catch (error) {
+    logger.error(`Failed to prepare placeholder SDK dir ${sdkDir}: ${error.message}`);
+  }
+  return sdkDir;
+}
+
 function detectTsdk() {
   if (!etsLangServerPath) return undefined;
   const serverBinDir = path.dirname(etsLangServerPath);
@@ -100,11 +121,9 @@ async function main() {
         return;
       }
 
-      // listHelperPaths tolerates a missing SDK directory: ArkUI/SDK typings degrade
-      // but TypeScript-level features (definition, hover, completion) keep working.
       if (!initializationOptions.ohosSdkPath) {
-        initializationOptions.ohosSdkPath = '/ohos-sdk-not-configured';
-        logger.error('No ohosSdkPath in LSP settings or env (ZED_ETS_OHOS_SDK_PATH/OHOS_SDK_PATH); ArkUI SDK types will be unavailable until lsp.arkts-language-server.initialization_options.ohosSdkPath is set in Zed settings.');
+        initializationOptions.ohosSdkPath = ensurePlaceholderSdk();
+        logger.error('No ohosSdkPath in LSP settings or env (ZED_ETS_OHOS_SDK_PATH/OHOS_SDK_PATH); using a placeholder SDK skeleton, ArkUI SDK types will be unavailable until lsp.arkts-language-server.initialization_options.ohosSdkPath is set in Zed settings.');
       }
 
       const ohos = await listHelperPaths(initializationOptions.tsdk, initializationOptions.ohosSdkPath);
