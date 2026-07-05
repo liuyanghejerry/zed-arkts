@@ -14,3 +14,10 @@ rev = "2b3d4b944ea4417729ebcd030834a5352cff7bb2"
 [language_servers.arkts-language-server]
 name = "ArkTS LSP"
 languages = ["ArkTS Language"]
+
+# The @arkts/language-server (volar-based) only processes documents whose LSP
+# languageId it recognizes; Zed otherwise sends the lowercased language name
+# ("arkts language"), which the server silently treats as plain text (empty
+# definition/hover/highlight results).
+[language_servers.arkts-language-server.language_ids]
+"ArkTS Language" = "ets"
