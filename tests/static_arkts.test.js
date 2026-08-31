@@ -38,4 +38,18 @@ test("fixture parses and existing highlight query compiles", () => {
   assert.doesNotThrow(() => query("highlights"));
 });
 
-module.exports = { assertCapture, captureTexts };
+test("highlights distinguish ArkTS and ArkUI syntax roles", () => {
+  for (const [capture, text] of [
+    ["attribute.builtin", "Component"],
+    ["type", "Dashboard"],
+    ["function.method", "build"],
+    ["function.builtin", "Column"],
+    ["property", "title"],
+    ["variable.parameter", "value"],
+    ["type.builtin", "string"],
+    ["constant", "MAX_ITEMS"],
+    ["function.builtin", "$r"],
+  ]) {
+    assertCapture("highlights", capture, text);
+  }
+});
