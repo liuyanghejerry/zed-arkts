@@ -33,6 +33,14 @@ function assertCapture(queryName, captureName, text) {
   );
 }
 
+function assertCaptureIncludes(queryName, captureName, text) {
+  assert.ok(
+    captureTexts(queryName).some((capture) =>
+      capture.name === captureName && capture.text.includes(text)),
+    `missing @${captureName} capture containing ${JSON.stringify(text)} in ${queryName}.scm`,
+  );
+}
+
 test("fixture parses and existing highlight query compiles", () => {
   assert.equal(tree.rootNode.hasError, false);
   assert.doesNotThrow(() => query("highlights"));
@@ -52,4 +60,33 @@ test("highlights distinguish ArkTS and ArkUI syntax roles", () => {
   ]) {
     assertCapture("highlights", capture, text);
   }
+});
+
+test("outline exposes ArkTS declarations and build methods", () => {
+  for (const name of [
+    "ItemData",
+    "LoadState",
+    "ItemStore",
+    "getTitle",
+    "normalizeTitle",
+    "Dashboard",
+    "updateTitle",
+    "build",
+  ]) {
+    assertCapture("outline", "name", name);
+  }
+  assertCaptureIncludes("outline", "item", "struct Dashboard");
+});
+
+test("text objects cover components functions parameters and comments", () => {
+  assertCaptureIncludes("textobjects", "class.around", "struct Dashboard");
+  assertCaptureIncludes("textobjects", "class.inside", "@State title");
+  assertCaptureIncludes("textobjects", "function.around", "normalizeTitle");
+  assertCaptureIncludes("textobjects", "function.around", "build()");
+  assertCapture("textobjects", "parameter.inside", "value: string");
+  assertCapture(
+    "textobjects",
+    "comment.around",
+    "// Text displayed in the main card.",
+  );
 });
