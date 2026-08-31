@@ -6,7 +6,11 @@ This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Milli
 
 ## Features
 
-- **Syntax Highlighting**: Provides TypeScript-based syntax highlighting for ETS files
+- **Syntax highlighting**: Distinguishes ArkTS declarations, decorators, ArkUI components, methods, properties, types, constants, and resources.
+- **Outline navigation**: Lists components, classes, interfaces, enums, functions, methods, and `build` methods.
+- **Automatic indentation**: Indents ArkTS blocks, component bodies, UI containers, and multiline collections.
+- **Bracket matching**: Matches parentheses, square brackets, and braces.
+- **Text objects**: Selects components/classes, functions/methods, parameters, and comments.
 - **Language Server**: Provides basic language server support, such as go to definition, and find references.
 
 ![Module definition](assets/screenshot-1.jpg)
@@ -105,6 +109,14 @@ cargo build --release
 ## Testing
 
 This project includes comprehensive **fully automated** testing for the LSP implementation.
+
+Tree-sitter editing queries are tested against the exact grammar revision from
+`extension.toml`:
+
+```bash
+npm ci
+npm run test:queries
+```
 
 ### Full E2E Automation (完全自动化)
 

@@ -110,3 +110,18 @@ test("structural queries cover indentation and bracket pairs", () => {
     assertCapture("brackets", capture, text);
   }
 });
+
+test("documentation and CI expose the editing query support", () => {
+  const readme = fs.readFileSync(path.join(root, "README.md"), "utf8");
+  const ci = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
+  for (const feature of [
+    "Syntax highlighting",
+    "Outline navigation",
+    "Automatic indentation",
+    "Bracket matching",
+    "Text objects",
+  ]) {
+    assert.match(readme, new RegExp(feature, "i"));
+  }
+  assert.match(ci, /npm run test:queries/);
+});
