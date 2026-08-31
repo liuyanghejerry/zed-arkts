@@ -90,3 +90,23 @@ test("text objects cover components functions parameters and comments", () => {
     "// Text displayed in the main card.",
   );
 });
+
+test("structural queries cover indentation and bracket pairs", () => {
+  assertCaptureIncludes("indents", "indent", "@State title");
+  assertCaptureIncludes("indents", "indent", "return value.trim()");
+  assertCaptureIncludes("indents", "indent", "Text(this.title)");
+  assertCaptureIncludes("indents", "indent", "16,");
+  assertCapture("indents", "outdent", "}");
+  assertCapture("indents", "outdent", "]");
+
+  for (const [capture, text] of [
+    ["open", "("],
+    ["close", ")"],
+    ["open", "["],
+    ["close", "]"],
+    ["open", "{"],
+    ["close", "}"],
+  ]) {
+    assertCapture("brackets", capture, text);
+  }
+});
