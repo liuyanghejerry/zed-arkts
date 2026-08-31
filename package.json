@@ -1,0 +1,11 @@
+{
+  "name": "zed-arkts-query-tests",
+  "private": true,
+  "scripts": {
+    "test:queries": "node --test tests/static_arkts.test.js"
+  },
+  "devDependencies": {
+    "tree-sitter": "0.25.1",
+    "tree-sitter-arkts": "github:liuyanghejerry/tree-sitter-arkts#2b3d4b944ea4417729ebcd030834a5352cff7bb2"
+  }
+}
