@@ -91,7 +91,8 @@ struct Test {
           textDocumentSync: 1,
           documentFormattingProvider: true,
           documentRangeFormattingProvider: true
-        }
+        },
+        receivedInitializationOptions: message.params.initializationOptions,
       }
     };
     
