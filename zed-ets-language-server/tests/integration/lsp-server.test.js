@@ -1,18 +1,36 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { spawn } from 'child_process';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const serverPath = join(__dirname, '../../index.js');
+const mockServerPath = join(__dirname, '../mocks/mock-ets-server.js');
+const bundledTsdk = join(__dirname, '../../node_modules/ohos-typescript/lib');
+
+// Hermetic env: never inherit ambient tsdk/sdk settings from the shell.
+function baseEnv(overrides = {}) {
+  return {
+    ...process.env,
+    ETS_LANG_SERVER: mockServerPath,
+    TSDK: '',
+    ZED_ETS_TSDK: '',
+    OHOS_SDK_PATH: '',
+    ZED_ETS_OHOS_SDK_PATH: '',
+    ...overrides,
+  };
+}
+
 /**
  * 创建 LSP 消息
  */
 function createLSPMessage(content) {
-  const json = JSON.stringify(content);
-  const contentLength = Buffer.byteLength(json, 'utf8');
-  return `Content-Length: ${contentLength}\r\n\r\n${json}`;
+  const contentLength = Buffer.byteLength(JSON.stringify(content));
+  return `Content-Length: ${contentLength}\r\n\r\n${JSON.stringify(content)}`;
 }
 
 /**
@@ -22,7 +40,7 @@ function parseLSPResponse(data) {
   const text = data.toString();
   const match = text.match(/Content-Length: (\d+)\r\n\r\n(.*)/s);
   if (!match) return null;
-  
+
   try {
     return JSON.parse(match[2]);
   } catch (e) {
@@ -30,28 +48,66 @@ function parseLSPResponse(data) {
   }
 }
 
+/**
+ * 等待特定响应
+ */
+function waitForResponse(responses, predicate, timeout = 2000) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const checkInterval = setInterval(() => {
+      const response = responses.find(predicate);
+      if (response) {
+        clearInterval(checkInterval);
+        resolve(response);
+      } else if (Date.now() - startTime > timeout) {
+        clearInterval(checkInterval);
+        reject(new Error('Timeout waiting for response'));
+      }
+    }, 50);
+  });
+}
+
+function startWrapper(env) {
+  const serverProcess = spawn('node', [serverPath], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env,
+  });
+
+  const responses = [];
+  serverProcess.stdout.on('data', (data) => {
+    const response = parseLSPResponse(data);
+    if (response) {
+      responses.push(response);
+    }
+  });
+
+  serverProcess.stderr.on('data', (data) => {
+    console.error(`LSP Server Error: ${data}`);
+  });
+
+  return { serverProcess, responses };
+}
+
+function initializeMessage(id) {
+  return createLSPMessage({
+    jsonrpc: '2.0',
+    id,
+    method: 'initialize',
+    params: {
+      processId: null,
+      rootUri: null,
+      capabilities: {},
+    },
+  });
+}
+
 describe('LSP Server Integration Tests', () => {
   let serverProcess;
   let responses = [];
+  let messageId = 1;
 
   beforeAll(() => {
-    // 启动 LSP 服务器
-    const serverPath = join(__dirname, '../../index.js');
-    serverProcess = spawn('node', [serverPath], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    // 收集响应
-    serverProcess.stdout.on('data', (data) => {
-      const response = parseLSPResponse(data);
-      if (response) {
-        responses.push(response);
-      }
-    });
-
-    serverProcess.stderr.on('data', (data) => {
-      console.error(`LSP Server Error: ${data}`);
-    });
+    ({ serverProcess, responses } = startWrapper(baseEnv()));
   });
 
   afterAll(() => {
@@ -60,65 +116,78 @@ describe('LSP Server Integration Tests', () => {
     }
   });
 
-  it('should respond to initialize request', (done) => {
-    const initRequest = {
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'initialize',
-      params: {
-        processId: process.pid,
-        rootUri: null,
-        capabilities: {}
-      }
-    };
+  it('should respond to initialize request', async () => {
+    serverProcess.stdin.write(initializeMessage(messageId));
+    const initResponse = await waitForResponse(responses, (r) => r.id === messageId);
+    messageId++;
 
-    const message = createLSPMessage(initRequest);
-    serverProcess.stdin.write(message);
-
-    // 等待响应
-    setTimeout(() => {
-      const initResponse = responses.find(r => r.id === 1);
-      expect(initResponse).toBeDefined();
-      expect(initResponse.result).toBeDefined();
-      expect(initResponse.result.capabilities).toBeDefined();
-      done();
-    }, 1000);
+    expect(initResponse.result).toBeDefined();
+    expect(initResponse.result.capabilities).toBeDefined();
   });
 
-  it('should accept initialized notification', (done) => {
-    const initializedNotif = {
+  it('should auto-detect the bundled tsdk when none is configured', async () => {
+    serverProcess.stdin.write(initializeMessage(messageId));
+    const initResponse = await waitForResponse(responses, (r) => r.id === messageId);
+    messageId++;
+
+    expect(initResponse.result.initializationOptions.typescript.tsdk).toBe(bundledTsdk);
+  });
+
+  it('should accept initialized notification', async () => {
+    serverProcess.stdin.write(createLSPMessage({
       jsonrpc: '2.0',
       method: 'initialized',
-      params: {}
-    };
-
-    const message = createLSPMessage(initializedNotif);
-    serverProcess.stdin.write(message);
+      params: {},
+    }));
 
     // 通知不需要响应，只需确保不崩溃
-    setTimeout(() => {
-      expect(serverProcess.killed).toBe(false);
-      done();
-    }, 500);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(serverProcess.exitCode).toBeNull();
   });
 
-  it('should handle shutdown request', (done) => {
-    const shutdownRequest = {
+  it('should handle shutdown request', async () => {
+    serverProcess.stdin.write(createLSPMessage({
       jsonrpc: '2.0',
       id: 99,
       method: 'shutdown',
-      params: null
-    };
+      params: null,
+    }));
 
-    const message = createLSPMessage(shutdownRequest);
-    serverProcess.stdin.write(message);
+    const shutdownResponse = await waitForResponse(responses, (r) => r.id === 99);
+    // 某些 LSP 服务器可能返回 null result
+    expect(shutdownResponse).toBeDefined();
+  });
+});
 
-    setTimeout(() => {
-      const shutdownResponse = responses.find(r => r.id === 99);
-      // 某些 LSP 服务器可能返回 null result
-      expect(shutdownResponse).toBeDefined();
-      done();
-    }, 1000);
+describe('LSP tsdk fallback', () => {
+  // A tsdk without lib/typescript.js (e.g. the native TypeScript 7 line)
+  // used to hang the real server inside initialize. The wrapper must
+  // substitute the bundled ohos-typescript instead of forwarding it.
+  it('substitutes a broken TSDK env value with the bundled ohos-typescript', async () => {
+    const brokenTsdkDir = mkdtempSync(join(tmpdir(), 'zed-ets-broken-tsdk-'));
+    const { serverProcess, responses } = startWrapper(baseEnv({ TSDK: brokenTsdkDir }));
+
+    try {
+      serverProcess.stdin.write(initializeMessage(1));
+      const initResponse = await waitForResponse(responses, (r) => r.id === 1);
+
+      expect(initResponse.result.initializationOptions.typescript.tsdk).toBe(bundledTsdk);
+    } finally {
+      serverProcess.kill();
+    }
+  });
+
+  it('forwards a valid TSDK unchanged', async () => {
+    const { serverProcess, responses } = startWrapper(baseEnv({ TSDK: bundledTsdk }));
+
+    try {
+      serverProcess.stdin.write(initializeMessage(1));
+      const initResponse = await waitForResponse(responses, (r) => r.id === 1);
+
+      expect(initResponse.result.initializationOptions.typescript.tsdk).toBe(bundledTsdk);
+    } finally {
+      serverProcess.kill();
+    }
   });
 });
 
@@ -126,7 +195,7 @@ describe('LSP Message Protocol', () => {
   it('should format messages correctly', () => {
     const content = { jsonrpc: '2.0', method: 'test' };
     const message = createLSPMessage(content);
-    
+
     expect(message).toContain('Content-Length:');
     expect(message).toContain('\r\n\r\n');
     expect(message).toContain(JSON.stringify(content));
@@ -140,7 +209,7 @@ describe('LSP Message Protocol', () => {
     };
     const data = createLSPMessage(mockResponse);
     const parsed = parseLSPResponse(Buffer.from(data));
-    
+
     expect(parsed).toEqual(mockResponse);
   });
 });

@@ -91,10 +91,12 @@ struct Test {
           textDocumentSync: 1,
           documentFormattingProvider: true,
           documentRangeFormattingProvider: true
-        }
+        },
+        // Echo what the wrapper forwarded so tests can assert on it.
+        initializationOptions: message.params?.initializationOptions ?? {}
       }
     };
-    
+
     process.send(response);
   }
   
