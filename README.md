@@ -8,6 +8,7 @@ This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Milli
 
 - **Syntax Highlighting**: Provides TypeScript-based syntax highlighting for ETS files
 - **Language Server**: Provides basic language server support, such as go to definition, and find references.
+- **HarmonyOS SDK types**: Resolves OpenHarmony and HMS `@kit.*` declarations from an installed DevEco Studio SDK.
 
 ![Module definition](assets/screenshot-1.jpg)
 ![Symbol definition](assets/screenshot-1.jpg)
@@ -31,7 +32,7 @@ This is a **Zed language extension** that provides:
 ## Non-goals
 - Debuggers.
 - Code snippets.
-- OpenHarmony SDK management.
+- Installing or updating HarmonyOS SDKs.
 
 ## Installation
 
@@ -44,23 +45,45 @@ You need a Node.js environment to build this extension. Prefer Node.js 24 curren
 
 ## Configuration
 
-All you need is to put language server settings in zed's `settings.json`:
+The extension automatically detects the SDK bundled with DevEco Studio in its
+standard installation location and the macOS user SDK directories under
+`~/Library/OpenHarmony/Sdk` and `~/Library/Huawei/Sdk`. It also checks versioned
+SDK directories and uses the newest installed version when no `default` SDK is
+available.
+
+Explicit settings take precedence over environment variables and automatic
+detection. Use the following configuration only when DevEco Studio or its SDK
+is installed in a custom location:
 
 ```json5
 {
   "lsp": {
     "arkts-language-server": {
       "initialization_options": {
-        "tsdk": "/path/to/typescript/lib",
-        "ohosSdkPath": "/path/to/OpenHarmony/xx"
+        "ohosSdkPath": "/path/to/sdk/default/openharmony",
+        "hmsSdkPath": "/path/to/sdk/default/hms"
       }
     }
   }
 }
 ```
 
-- `tsdk`: Path to typescript declarations.
-- `ohosSdkPath` Path to certain Harmony SDK.
+- `ohosSdkPath`: OpenHarmony SDK root containing `ets/api`, `ets/kits`, and
+  `ets/build-tools/ets-loader/tsconfig.json`.
+- `hmsSdkPath`: Optional HMS SDK root. When omitted, a sibling `hms` directory
+  is detected automatically.
+- `tsdk`: Optional TypeScript declarations directory. The wrapper normally
+  detects the `ohos-typescript` installation automatically.
+
+The corresponding environment variables are `ZED_ETS_OHOS_SDK_PATH`,
+`OHOS_SDK_PATH`, `HARMONYOS_SDK_HOME`, `OPENHARMONY_SDK_HOME`,
+`DEVECO_SDK_HOME`, `DEVECO_STUDIO_HOME`, `DEVECO_HOME`,
+`ZED_ETS_HMS_SDK_PATH`, and `HMS_SDK_PATH`.
+
+If imports such as `@kit.AbilityKit` report `ts 2307`, verify that
+the configured directory contains `openharmony/ets` or is the OpenHarmony SDK
+root itself. Do not point it directly at the child `ets` directory. Restart the
+language server after changing SDK settings.
 
 ### Code Formatting
 
@@ -97,9 +120,6 @@ cargo build
 
 # Build for release
 cargo build --release
-
-# Use the build script
-./build.sh
 ```
 
 ## Testing
