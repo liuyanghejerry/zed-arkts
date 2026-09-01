@@ -37,12 +37,32 @@ function ensurePlaceholderSdk() {
 
 function detectTsdk() {
   if (!etsLangServerPath) return undefined;
-  const serverBinDir = path.dirname(etsLangServerPath);
-  const candidates = [
-    path.join(serverBinDir, '..', '..', '..', 'ohos-typescript', 'lib'),
-    path.join(serverBinDir, '..', 'node_modules', 'ohos-typescript', 'lib'),
-  ];
-  return candidates.find((dir) => fs.existsSync(path.join(dir, 'typescript.js')));
+  // The extension installs ohos-typescript next to @arkts/language-server:
+  // <work dir>/node_modules/ohos-typescript/lib
+  // <work dir>/node_modules/@arkts/language-server/bin/ets-language-server.js
+  // Walk the ancestors of the server path and accept either layout so the
+  // detection also works for servers installed at other depths.
+  let dir = path.dirname(path.resolve(etsLangServerPath));
+  for (let depth = 0; depth < 8; depth++) {
+    for (const candidate of [
+      path.join(dir, 'ohos-typescript', 'lib'),
+      path.join(dir, 'node_modules', 'ohos-typescript', 'lib'),
+    ]) {
+      if (fs.existsSync(path.join(candidate, 'typescript.js'))) return candidate;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
+}
+
+// A usable tsdk must contain lib/typescript.js. The native TypeScript 7 line
+// ships no compiler API there, and settings inherited from another machine may
+// point at a half-installed directory; forwarding such a tsdk makes the server
+// hang inside `initialize` without ever answering.
+function isValidTsdk(dir) {
+  return Boolean(dir) && fs.existsSync(path.join(dir, 'typescript.js'));
 }
 
 async function main() {
@@ -108,6 +128,17 @@ async function main() {
       if (!initializationOptions.tsdk) {
         initializationOptions.tsdk = process.env.ZED_ETS_TSDK || process.env.TSDK || detectTsdk();
         logger.info(`No tsdk in initializationOptions; falling back to: ${initializationOptions.tsdk}`);
+      }
+
+      // A tsdk without lib/typescript.js (native TypeScript 7, stale settings)
+      // hangs the server inside initialize. Substitute the ohos-typescript
+      // installed next to the language server instead of forwarding it.
+      if (!isValidTsdk(initializationOptions.tsdk)) {
+        const fallbackTsdk = detectTsdk();
+        if (fallbackTsdk) {
+          logger.error(`tsdk ${initializationOptions.tsdk} has no lib/typescript.js; falling back to ${fallbackTsdk}`);
+          initializationOptions.tsdk = fallbackTsdk;
+        }
       }
       if (!initializationOptions.ohosSdkPath) {
         initializationOptions.ohosSdkPath = process.env.ZED_ETS_OHOS_SDK_PATH || process.env.OHOS_SDK_PATH;

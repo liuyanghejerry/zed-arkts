@@ -57,20 +57,28 @@ if [ -z "$OHOS_SDK_PATH" ]; then
 fi
 
 # 设置 TypeScript 路径（如果未设置）
+# Prefer the ohos-typescript locked next to @arkts/language-server: a
+# system-wide TypeScript drifts with the runner image (TypeScript 7's lib/
+# no longer ships typescript.js, which hangs the server inside initialize).
 if [ -z "$TSDK" ]; then
-    # 尝试查找 TypeScript
-    if [ -d "/usr/local/lib/node_modules/typescript/lib" ]; then
-        export TSDK="/usr/local/lib/node_modules/typescript/lib"
-    elif [ -d "node_modules/typescript/lib" ]; then
-        export TSDK="$(pwd)/node_modules/typescript/lib"
-    else
+    OHOS_TSDK="$(pwd)/node_modules/ohos-typescript/lib"
+    LOCAL_TSDK="$(pwd)/node_modules/typescript/lib"
+    SYSTEM_TSDK="/usr/local/lib/node_modules/typescript/lib"
+    for CANDIDATE in "$OHOS_TSDK" "$LOCAL_TSDK" "$SYSTEM_TSDK"; do
+        if [ -f "$CANDIDATE/typescript.js" ]; then
+            export TSDK="$CANDIDATE"
+            break
+        fi
+    done
+    if [ -z "$TSDK" ]; then
         # 安装 TypeScript 作为开发依赖
         echo "Installing TypeScript..."
         npm install --no-save typescript
-        export TSDK="$(pwd)/node_modules/typescript/lib"
+        export TSDK="$LOCAL_TSDK"
     fi
     echo "Using TSDK: $TSDK"
 fi
+echo "TSDK version: $(node -p "require('$TSDK/typescript.js').version" 2>/dev/null || echo unknown)"
 
 # 创建测试脚本
 cat > /tmp/lsp-automated-test.mjs << 'EOJS'
@@ -237,7 +245,7 @@ const runNextTest = () => {
             processId: process.pid,
             rootUri: `file://${projectDir}`,
             initializationOptions: {
-              tsdk: process.env.TSDK || '/usr/local/lib/node_modules/typescript/lib',
+              ...(process.env.TSDK ? { tsdk: process.env.TSDK } : {}),
               ohosSdkPath: process.env.OHOS_SDK_PATH || '/tmp/mock-openharmony-sdk'
             },
             capabilities: {
