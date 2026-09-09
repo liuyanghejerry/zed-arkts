@@ -92,10 +92,11 @@ struct Test {
           documentFormattingProvider: true,
           documentRangeFormattingProvider: true
         },
-        receivedInitializationOptions: message.params.initializationOptions,
+        // Echo what the wrapper forwarded so tests can assert on it.
+        initializationOptions: message.params?.initializationOptions ?? {}
       }
     };
-    
+
     process.send(response);
   }
   

@@ -77,14 +77,22 @@ export ETS_LANG_SERVER="$(pwd)/$ETS_SERVER_PATH"
 export OHOS_SDK_PATH="${OHOS_SDK_PATH:-/tmp/mock-openharmony-sdk}"
 
 # 查找 TypeScript
+# Prefer the ohos-typescript locked next to @arkts/language-server: a
+# system-wide TypeScript drifts with the runner image (TypeScript 7's lib/
+# no longer ships typescript.js, which hangs the server inside initialize).
 if [ -z "$TSDK" ]; then
-    if [ -d "/usr/local/lib/node_modules/typescript/lib" ]; then
-        export TSDK="/usr/local/lib/node_modules/typescript/lib"
-    elif [ -d "node_modules/typescript/lib" ]; then
-        export TSDK="$(pwd)/node_modules/typescript/lib"
-    else
+    OHOS_TSDK="$(pwd)/node_modules/ohos-typescript/lib"
+    LOCAL_TSDK="$(pwd)/node_modules/typescript/lib"
+    SYSTEM_TSDK="/usr/local/lib/node_modules/typescript/lib"
+    for CANDIDATE in "$OHOS_TSDK" "$LOCAL_TSDK" "$SYSTEM_TSDK"; do
+        if [ -f "$CANDIDATE/typescript.js" ]; then
+            export TSDK="$CANDIDATE"
+            break
+        fi
+    done
+    if [ -z "$TSDK" ]; then
         npm install --no-save --silent typescript
-        export TSDK="$(pwd)/node_modules/typescript/lib"
+        export TSDK="$LOCAL_TSDK"
     fi
 fi
 

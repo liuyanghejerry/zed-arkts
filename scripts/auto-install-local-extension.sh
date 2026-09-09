@@ -72,16 +72,14 @@ fi
 mkdir -p "$CONFIG_DIR"
 
 # 如果配置文件不存在，创建一个
+# Leave initialization_options unset: the wrapper auto-detects the
+# ohos-typescript installed with the language server and falls back to a
+# placeholder SDK skeleton, so no machine-specific paths are baked in.
 if [ ! -f "$CONFIG_DIR/settings.json" ]; then
     cat > "$CONFIG_DIR/settings.json" << 'EOF'
 {
   "lsp": {
-    "arkts-language-server": {
-      "initialization_options": {
-        "tsdk": "/usr/local/lib/node_modules/typescript/lib",
-        "ohosSdkPath": "/opt/OpenHarmony/sdk"
-      }
-    }
+    "arkts-language-server": {}
   }
 }
 EOF

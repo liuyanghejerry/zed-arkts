@@ -127,7 +127,7 @@ describe('SDK initialization', () => {
     );
 
     const response = await waitForResponse((message) => message.id === 1);
-    const initializationOptions = response.result.receivedInitializationOptions;
+    const initializationOptions = response.result.initializationOptions;
 
     expect(initializationOptions.ohos.sdkPath).toBe(sdkRoot);
     expect(initializationOptions.ets.sdkPath).toBe(sdkRoot);
@@ -157,7 +157,7 @@ describe('SDK initialization', () => {
     );
 
     const response = await waitForResponse((message) => message.id === 2);
-    const initializationOptions = response.result.receivedInitializationOptions;
+    const initializationOptions = response.result.initializationOptions;
 
     expect(initializationOptions.ets.sdkPath).toBe(
       path.join(fixtureDirectory, 'zed-ets-empty-ohos-sdk'),
