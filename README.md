@@ -11,7 +11,7 @@ This project is based on [Million-mo/tree-sitter-arkts](https://github.com/Milli
 - **Automatic indentation**: Indents ArkTS blocks, component bodies, UI containers, and multiline collections.
 - **Bracket matching**: Matches parentheses, square brackets, and braces.
 - **Text objects**: Selects components/classes, functions/methods, parameters, and comments.
-- **Language Server**: Provides basic language server support, such as go to definition, and find references.
+- **Language server**: Provides basic language server support, such as go to definition and find references.
 
 ![Module definition](assets/screenshot-1.jpg)
 ![Symbol definition](assets/screenshot-1.jpg)

@@ -1,20 +1,20 @@
-"use strict";
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import test from 'node:test';
+import { fileURLToPath } from 'node:url';
+import Parser from 'tree-sitter';
+import ArkTS from 'tree-sitter-arkts';
 
-const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
-const test = require("node:test");
-const Parser = require("tree-sitter");
-const ArkTS = require("tree-sitter-arkts");
-
-const root = path.resolve(__dirname, "..");
-const source = fs.readFileSync(path.join(__dirname, "fixtures/editing_features.ets"), "utf8");
+const testDirectory = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(testDirectory, '..');
+const source = fs.readFileSync(path.join(root, 'fixtures/editing_features.ets'), 'utf8');
 const parser = new Parser();
 parser.setLanguage(ArkTS);
 const tree = parser.parse(source);
 
 function query(name) {
-  const querySource = fs.readFileSync(path.join(root, "languages/arkts", `${name}.scm`), "utf8");
+  const querySource = fs.readFileSync(path.join(root, 'languages/arkts', `${name}.scm`), 'utf8');
   return new Parser.Query(ArkTS, querySource);
 }
 
@@ -41,87 +41,87 @@ function assertCaptureIncludes(queryName, captureName, text) {
   );
 }
 
-test("fixture parses and existing highlight query compiles", () => {
+test('fixture parses and existing highlight query compiles', () => {
   assert.equal(tree.rootNode.hasError, false);
-  assert.doesNotThrow(() => query("highlights"));
+  assert.doesNotThrow(() => query('highlights'));
 });
 
-test("highlights distinguish ArkTS and ArkUI syntax roles", () => {
+test('highlights distinguish ArkTS and ArkUI syntax roles', () => {
   for (const [capture, text] of [
-    ["attribute.builtin", "Component"],
-    ["type", "Dashboard"],
-    ["function.method", "build"],
-    ["function.builtin", "Column"],
-    ["property", "title"],
-    ["variable.parameter", "value"],
-    ["type.builtin", "string"],
-    ["constant", "MAX_ITEMS"],
-    ["function.builtin", "$r"],
+    ['attribute.builtin', 'Component'],
+    ['type', 'Dashboard'],
+    ['function.method', 'build'],
+    ['function.builtin', 'Column'],
+    ['property', 'title'],
+    ['variable.parameter', 'value'],
+    ['type.builtin', 'string'],
+    ['constant', 'MAX_ITEMS'],
+    ['function.builtin', '$r'],
   ]) {
-    assertCapture("highlights", capture, text);
+    assertCapture('highlights', capture, text);
   }
 });
 
-test("outline exposes ArkTS declarations and build methods", () => {
+test('outline exposes ArkTS declarations and build methods', () => {
   for (const name of [
-    "ItemData",
-    "LoadState",
-    "ItemStore",
-    "getTitle",
-    "normalizeTitle",
-    "Dashboard",
-    "updateTitle",
-    "build",
+    'ItemData',
+    'LoadState',
+    'ItemStore',
+    'getTitle',
+    'normalizeTitle',
+    'Dashboard',
+    'updateTitle',
+    'build',
   ]) {
-    assertCapture("outline", "name", name);
+    assertCapture('outline', 'name', name);
   }
-  assertCaptureIncludes("outline", "item", "struct Dashboard");
+  assertCaptureIncludes('outline', 'item', 'struct Dashboard');
 });
 
-test("text objects cover components functions parameters and comments", () => {
-  assertCaptureIncludes("textobjects", "class.around", "struct Dashboard");
-  assertCaptureIncludes("textobjects", "class.inside", "@State title");
-  assertCaptureIncludes("textobjects", "function.around", "normalizeTitle");
-  assertCaptureIncludes("textobjects", "function.around", "build()");
-  assertCapture("textobjects", "parameter.inside", "value: string");
+test('text objects cover components functions parameters and comments', () => {
+  assertCaptureIncludes('textobjects', 'class.around', 'struct Dashboard');
+  assertCaptureIncludes('textobjects', 'class.inside', '@State title');
+  assertCaptureIncludes('textobjects', 'function.around', 'normalizeTitle');
+  assertCaptureIncludes('textobjects', 'function.around', 'build()');
+  assertCapture('textobjects', 'parameter.inside', 'value: string');
   assertCapture(
-    "textobjects",
-    "comment.around",
-    "// Text displayed in the main card.",
+    'textobjects',
+    'comment.around',
+    '// Text displayed in the main card.',
   );
 });
 
-test("structural queries cover indentation and bracket pairs", () => {
-  assertCaptureIncludes("indents", "indent", "@State title");
-  assertCaptureIncludes("indents", "indent", "return value.trim()");
-  assertCaptureIncludes("indents", "indent", "Text(this.title)");
-  assertCaptureIncludes("indents", "indent", "16,");
-  assertCapture("indents", "outdent", "}");
-  assertCapture("indents", "outdent", "]");
+test('structural queries cover indentation and bracket pairs', () => {
+  assertCaptureIncludes('indents', 'indent', '@State title');
+  assertCaptureIncludes('indents', 'indent', 'return value.trim()');
+  assertCaptureIncludes('indents', 'indent', 'Text(this.title)');
+  assertCaptureIncludes('indents', 'indent', '16,');
+  assertCapture('indents', 'outdent', '}');
+  assertCapture('indents', 'outdent', ']');
 
   for (const [capture, text] of [
-    ["open", "("],
-    ["close", ")"],
-    ["open", "["],
-    ["close", "]"],
-    ["open", "{"],
-    ["close", "}"],
+    ['open', '('],
+    ['close', ')'],
+    ['open', '['],
+    ['close', ']'],
+    ['open', '{'],
+    ['close', '}'],
   ]) {
-    assertCapture("brackets", capture, text);
+    assertCapture('brackets', capture, text);
   }
 });
 
-test("documentation and CI expose the editing query support", () => {
-  const readme = fs.readFileSync(path.join(root, "README.md"), "utf8");
-  const ci = fs.readFileSync(path.join(root, ".github/workflows/ci.yml"), "utf8");
+test('documentation and CI expose the editing query support', () => {
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  const ci = fs.readFileSync(path.join(root, '.github/workflows/ci.yml'), 'utf8');
   for (const feature of [
-    "Syntax highlighting",
-    "Outline navigation",
-    "Automatic indentation",
-    "Bracket matching",
-    "Text objects",
+    'Syntax highlighting',
+    'Outline navigation',
+    'Automatic indentation',
+    'Bracket matching',
+    'Text objects',
   ]) {
-    assert.match(readme, new RegExp(feature, "i"));
+    assert.match(readme, new RegExp(feature, 'i'));
   }
   assert.match(ci, /npm run test:queries/);
 });

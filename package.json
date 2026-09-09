@@ -1,6 +1,9 @@
 {
   "name": "zed-arkts-query-tests",
+  "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "license": "MIT",
   "scripts": {
     "test:queries": "node --test tests/static_arkts.test.js"
   },
