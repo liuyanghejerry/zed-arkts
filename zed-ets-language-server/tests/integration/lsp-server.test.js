@@ -74,10 +74,21 @@ function startWrapper(env) {
   });
 
   const responses = [];
+  let stdoutBuffer = Buffer.alloc(0);
   serverProcess.stdout.on('data', (data) => {
-    const response = parseLSPResponse(data);
-    if (response) {
-      responses.push(response);
+    stdoutBuffer = Buffer.concat([stdoutBuffer, data]);
+    // SDK discovery can make initialize responses span multiple pipe chunks.
+    while (true) {
+      const headerEnd = stdoutBuffer.indexOf('\r\n\r\n');
+      if (headerEnd < 0) return;
+      const header = stdoutBuffer.subarray(0, headerEnd).toString('ascii');
+      const lengthMatch = header.match(/Content-Length:\s*(\d+)/i);
+      if (!lengthMatch) throw new Error('Invalid LSP response header');
+      const bodyStart = headerEnd + 4;
+      const bodyEnd = bodyStart + Number(lengthMatch[1]);
+      if (stdoutBuffer.length < bodyEnd) return;
+      responses.push(JSON.parse(stdoutBuffer.subarray(bodyStart, bodyEnd).toString('utf8')));
+      stdoutBuffer = stdoutBuffer.subarray(bodyEnd);
     }
   });
 

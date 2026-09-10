@@ -6,7 +6,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { logger } from './lib/logger.js';
 import { parse } from './lib/data-parser.js';
-import { listHelperPaths } from './lib/lib-expander.js'
+import { listHelperPaths } from './lib/lib-expander.js';
+import { resolveHmsSdkPath, resolveOhosSdkPath } from './lib/sdk-discovery.js';
 
 // ETS language server path, passed by Rust extension process through environment variable
 const etsLangServerPath = process.env.ETS_LANG_SERVER;
@@ -129,10 +130,7 @@ async function main() {
         initializationOptions.tsdk = process.env.ZED_ETS_TSDK || process.env.TSDK || detectTsdk();
         logger.info(`No tsdk in initializationOptions; falling back to: ${initializationOptions.tsdk}`);
       }
-
-      // A tsdk without lib/typescript.js (native TypeScript 7, stale settings)
-      // hangs the server inside initialize. Substitute the ohos-typescript
-      // installed next to the language server instead of forwarding it.
+      // A native TypeScript installation may not contain the JS compiler API.
       if (!isValidTsdk(initializationOptions.tsdk)) {
         const fallbackTsdk = detectTsdk();
         if (fallbackTsdk) {
@@ -140,8 +138,21 @@ async function main() {
           initializationOptions.tsdk = fallbackTsdk;
         }
       }
-      if (!initializationOptions.ohosSdkPath) {
-        initializationOptions.ohosSdkPath = process.env.ZED_ETS_OHOS_SDK_PATH || process.env.OHOS_SDK_PATH;
+
+      let hasRealOhosSdk = false;
+      try {
+        const resolvedSdk = resolveOhosSdkPath({
+          configuredPath: initializationOptions.ohosSdkPath,
+          env: process.env,
+        });
+        if (resolvedSdk) {
+          initializationOptions.ohosSdkPath = resolvedSdk.path;
+          hasRealOhosSdk = true;
+          logger.info(`Using HarmonyOS SDK from ${resolvedSdk.source}: ${resolvedSdk.path}`);
+        }
+      } catch (error) {
+        logger.error(error.message);
+        initializationOptions.ohosSdkPath = undefined;
       }
 
       // The server cannot finish `initialize` without a tsdk (it fails loading
@@ -154,13 +165,32 @@ async function main() {
 
       if (!initializationOptions.ohosSdkPath) {
         initializationOptions.ohosSdkPath = ensurePlaceholderSdk();
-        logger.error('No ohosSdkPath in LSP settings or env (ZED_ETS_OHOS_SDK_PATH/OHOS_SDK_PATH); using a placeholder SDK skeleton, ArkUI SDK types will be unavailable until lsp.arkts-language-server.initialization_options.ohosSdkPath is set in Zed settings.');
+        logger.error('No valid HarmonyOS SDK was found in LSP settings, environment variables, or standard DevEco Studio locations; using a placeholder SDK skeleton. ArkUI and @kit types will be unavailable until lsp.arkts-language-server.initialization_options.ohosSdkPath is set in Zed settings.');
       }
 
-      const ohos = await listHelperPaths(initializationOptions.tsdk, initializationOptions.ohosSdkPath);
+      try {
+        const resolvedHmsSdk = resolveHmsSdkPath({
+          configuredPath: initializationOptions.hmsSdkPath,
+          ohosSdkPath: hasRealOhosSdk ? initializationOptions.ohosSdkPath : undefined,
+          env: process.env,
+        });
+        if (resolvedHmsSdk) {
+          initializationOptions.hmsSdkPath = resolvedHmsSdk.path;
+          logger.info(`Using HMS SDK from ${resolvedHmsSdk.source}: ${resolvedHmsSdk.path}`);
+        }
+      } catch (error) {
+        logger.error(error.message);
+        initializationOptions.hmsSdkPath = undefined;
+      }
 
-      // Send both `ohos` and `ets` keys to stay compatible with
-      // @arkts/language-server v1.2.x (uses `ohos`) and v1.3.x+ (uses `ets`).
+      const ohos = await listHelperPaths(
+        initializationOptions.tsdk,
+        initializationOptions.ohosSdkPath,
+        initializationOptions.hmsSdkPath,
+      );
+
+      // Current servers read `ets`; retain the `ohos` alias for clients that
+      // still inspect the older configuration key.
       const etsSpecialRequest = {
         jsonrpc: '2.0',
         id: `zed-ets-wrapper-${Date.now()}`,

@@ -73,21 +73,29 @@ export async function listLibs(dirPath) {
   return await getFilesByPattern(dirPath, /d\.ts$/i);
 }
 
-export async function listHelperPaths(tsDir, harmonyDir) {
+export async function listHelperPaths(tsDir, harmonyDir, hmsDir) {
   const etsComponentPath = path.join(harmonyDir, '/ets/component');
   const etsLoaderConfigPath = path.join(harmonyDir, '/ets/build-tools/ets-loader/tsconfig.json');
   const etsLoaderPath = path.join(harmonyDir, '/ets/build-tools/ets-loader');
   const etsLoaderLibs = await listLibs(path.join(etsLoaderPath, '/declarations'));
 
+  const modulePaths = ["./api/*", "./kits/*", "./arkts/*"];
+  if (hmsDir) {
+    modulePaths.push(path.join(hmsDir, 'ets', 'api', '*'));
+    modulePaths.push(path.join(hmsDir, 'ets', 'kits', '*'));
+  }
+
   return {
     sdkPath: harmonyDir,
+    hmsPath: hmsDir,
+    hmsSdkPath: hmsDir,
     etsComponentPath,
     etsLoaderConfigPath,
     etsLoaderPath,
     baseUrl: path.join(harmonyDir, '/ets'),
     lib: [...(await listLibs(tsDir)), ...(await listLibs(etsComponentPath)), ...etsLoaderLibs],
     "paths": {
-      "*": ["./api/*", "./kits/*", "./arkts/*"],
+      "*": modulePaths,
       "@internal/full/*": ["./api/@internal/full/*"]
     },
   };
