@@ -248,7 +248,7 @@
 
 ; Build method - ArkTS特有
 (build_method
-  "build" @keyword.special)
+  "build" @function.method)
 
 ; Variable declarations
 (variable_declarator
@@ -277,6 +277,9 @@
 
 ; Identifiers
 (identifier) @variable
+
+((identifier) @constant
+  (#match? @constant "^[A-Z][A-Z0-9_]+$"))
 
 ; Special Identifiers
 ((identifier) @variable.builtin
